@@ -30,7 +30,7 @@ namespace SweetSpin.Core
         [SerializeField] private ParticleSystem winParticles;
         [SerializeField] private GameObject winLineRenderer;
 
-        private ReelController[] reelControllers;
+        private Reel[] reel;
         private SlotMachineConfiguration configuration;
         private ISymbolService symbolService;
         private IEventBus eventBus;
@@ -39,7 +39,7 @@ namespace SweetSpin.Core
         public Button SpinButton => spinButton;
         public Button IncreaseBetButton => increaseBetButton;
         public Button DecreaseBetButton => decreaseBetButton;
-        public ReelController[] ReelControllers => reelControllers;
+        public Reel[] Reels => reel;
 
         /// <summary>
         /// Initialize the view with required dependencies
@@ -63,7 +63,7 @@ namespace SweetSpin.Core
                 return;
             }
 
-            reelControllers = new ReelController[configuration.reelCount];
+            reel = new Reel[configuration.reelCount];
 
             for (int i = 0; i < configuration.reelCount; i++)
             {
@@ -75,16 +75,16 @@ namespace SweetSpin.Core
                 rt.anchoredPosition = new Vector2(xPos, 0);
 
                 // Get or add ReelController
-                ReelController controller = reelGO.GetComponent<ReelController>();
+                Reel controller = reelGO.GetComponent<Reel>();
                 if (controller == null)
-                    controller = reelGO.AddComponent<ReelController>();
+                    controller = reelGO.AddComponent<Reel>();
 
                 // Initialize the controller
-                controller.Initialize(i, configuration.symbolDatabase, symbolService);
-                reelControllers[i] = controller;
+                controller.Initialize(i, configuration.symbolDatabase);
+                reel[i] = controller;
             }
 
-            Debug.Log($"Created {reelControllers.Length} reels");
+            Debug.Log($"Created {reel.Length} reels");
         }
 
         private void SetupEventListeners()
@@ -103,7 +103,7 @@ namespace SweetSpin.Core
         /// </summary>
         public void SpinReels(SymbolType[,] results)
         {
-            for (int i = 0; i < reelControllers.Length; i++)
+            for (int i = 0; i < reel.Length; i++)
             {
                 SymbolType[] reelSymbols = new SymbolType[configuration.rowCount];
                 for (int j = 0; j < configuration.rowCount; j++)
@@ -112,7 +112,7 @@ namespace SweetSpin.Core
                 }
 
                 float delay = i * configuration.reelStopDelay;
-                reelControllers[i].Spin(reelSymbols, delay);
+                reel[i].Spin(reelSymbols, delay);
             }
         }
 
@@ -173,13 +173,13 @@ namespace SweetSpin.Core
         {
             for (int i = 0; i < win.matchCount; i++)
             {
-                if (i < reelControllers.Length)
+                if (i < reel.Length)
                 {
-                    reelControllers[i].AnimateSymbolAt(win.positions[i]);
+                    reel[i].AnimateSymbolAt(win.positions[i]);
                 }
             }
 
-            // Could also draw line here if we have LineRenderer setup
+            // TODO: Could also draw line here if we have LineRenderer setup
             // DrawWinLine(win.positions);
         }
 

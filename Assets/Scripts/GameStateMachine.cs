@@ -6,12 +6,12 @@ namespace SweetSpin
     public class GameStateMachine
     {
         private readonly SlotMachineModel model;
-        private readonly ReelController[] reels;
+        private readonly Reel[] reels;
         private readonly IEventBus eventBus;
 
         public GameState CurrentState { get; private set; }
 
-        public GameStateMachine(SlotMachineModel gameModel, ReelController[] reelControllers, IEventBus events)
+        public GameStateMachine(SlotMachineModel gameModel, Reel[] reelControllers, IEventBus events)
         {
             model = gameModel;
             reels = reelControllers;
