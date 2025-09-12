@@ -1,31 +1,19 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 
 namespace SweetSpin.Core
 {
     /// <summary>
-    /// Main game controller - Entry point for the slot machine game
-    /// Uses Service Locator pattern for dependency management
+    /// Main game controller - Orchestrates game logic
+    /// No longer responsible for view instantiation
     /// </summary>
     public class GameController : MonoBehaviour
     {
         [Header("Configuration")]
         [SerializeField] private SlotMachineConfiguration configuration;
 
-        [Header("View Components")]
-        [SerializeField] private Transform reelContainer;
-        [SerializeField] private GameObject reelPrefab;
-
-        [Header("UI Components")]
-        [SerializeField] private Button spinButton;
-        [SerializeField] private Button increaseBetButton;
-        [SerializeField] private Button decreaseBetButton;
-        [SerializeField] private TextMeshProUGUI creditsText;
-        [SerializeField] private TextMeshProUGUI betText;
-        [SerializeField] private TextMeshProUGUI winText;
-        [SerializeField] private TextMeshProUGUI linesText;
+        [Header("View")]
+        [SerializeField] private GameObject slotMachineViewPrefab; // The complete UI prefab
 
         // Services
         private IEventBus eventBus;
@@ -37,14 +25,14 @@ namespace SweetSpin.Core
 
         // Game components
         private SlotMachineModel gameModel;
-        private ReelController[] reelControllers;
+        private SlotMachineView slotMachineView;
         private GameStateMachine stateMachine;
 
         private void Start()
         {
             InitializeServices();
             InitializeGame();
-            SubscribeToEvents();
+            CreateView();
             SetupUI();
         }
 
@@ -62,8 +50,7 @@ namespace SweetSpin.Core
             symbolService.Initialize(configuration.symbolDatabase);
             paylineService.Initialize(configuration.paylinePatterns);
 
-            // Register additional runtime services
-            ServiceLocator.Instance.Register<IPaylineService>(new PaylineService());
+            // Initialize PaylineService properly
             var paylineServiceImpl = ServiceLocator.Instance.Get<IPaylineService>() as PaylineService;
             paylineServiceImpl?.Initialize(configuration.symbolDatabase);
         }
@@ -76,31 +63,53 @@ namespace SweetSpin.Core
             // Load saved credits
             int savedCredits = saveService.LoadCredits();
             gameModel.SetCredits(savedCredits > 0 ? savedCredits : configuration.startingCredits);
-
-            // Create reels
-            CreateReels();
-
-            // Initialize state machine
-            stateMachine = new GameStateMachine(gameModel, reelControllers, eventBus);
         }
 
-        private void CreateReels()
+        private void CreateView()
         {
-            reelControllers = new ReelController[configuration.reelCount];
-
-            for (int i = 0; i < configuration.reelCount; i++)
+            // Instantiate the complete slot machine view
+            if (slotMachineViewPrefab != null)
             {
-                GameObject reelGO = Instantiate(reelPrefab, reelContainer);
-                RectTransform rt = reelGO.GetComponent<RectTransform>();
-                rt.anchoredPosition = new Vector2(i * configuration.reelSpacing - (2 * configuration.reelSpacing), 0);
+                GameObject viewGO = Instantiate(slotMachineViewPrefab);
+                slotMachineView = viewGO.GetComponent<SlotMachineView>();
 
-                ReelController controller = reelGO.GetComponent<ReelController>();
-                if (controller == null)
-                    controller = reelGO.AddComponent<ReelController>();
+                if (slotMachineView == null)
+                {
+                    Debug.LogError("SlotMachineView component not found on prefab!");
+                    return;
+                }
 
-                controller.Initialize(i, configuration.symbolDatabase, symbolService);
-                reelControllers[i] = controller;
+                // Initialize the view with dependencies
+                slotMachineView.Initialize(configuration, symbolService, eventBus);
+
+                // Initialize state machine with the view's reel controllers
+                stateMachine = new GameStateMachine(gameModel, slotMachineView.ReelControllers, eventBus);
             }
+            else
+            {
+                Debug.LogError("SlotMachineView prefab not assigned!");
+            }
+        }
+
+        private void SetupUI()
+        {
+            if (slotMachineView == null) return;
+
+            // Wire up button events
+            if (slotMachineView.SpinButton != null)
+                slotMachineView.SpinButton.onClick.AddListener(OnSpinButtonClick);
+
+            if (slotMachineView.IncreaseBetButton != null)
+                slotMachineView.IncreaseBetButton.onClick.AddListener(() => ChangeBet(1));
+
+            if (slotMachineView.DecreaseBetButton != null)
+                slotMachineView.DecreaseBetButton.onClick.AddListener(() => ChangeBet(-1));
+
+            // Subscribe to events
+            SubscribeToEvents();
+
+            // Initial UI update
+            UpdateUI();
         }
 
         private void SubscribeToEvents()
@@ -109,19 +118,6 @@ namespace SweetSpin.Core
             eventBus.Subscribe<SpinCompletedEvent>(OnSpinCompleted);
             eventBus.Subscribe<CreditsChangedEvent>(OnCreditsChanged);
             eventBus.Subscribe<ReelStoppedEvent>(OnReelStopped);
-        }
-
-        private void SetupUI()
-        {
-            spinButton.onClick.AddListener(OnSpinButtonClick);
-
-            if (increaseBetButton != null)
-                increaseBetButton.onClick.AddListener(() => ChangeBet(1));
-
-            if (decreaseBetButton != null)
-                decreaseBetButton.onClick.AddListener(() => ChangeBet(-1));
-
-            UpdateUI();
         }
 
         private void OnSpinButtonClick()
@@ -136,7 +132,7 @@ namespace SweetSpin.Core
 
             if (!gameModel.CanSpin())
             {
-                winText.text = "Not enough credits!";
+                slotMachineView.ShowWinMessage("Not enough credits!", WinTier.None);
                 return;
             }
 
@@ -154,18 +150,8 @@ namespace SweetSpin.Core
             // Publish spin started event
             eventBus.Publish(new SpinStartedEvent(gameModel.CurrentBet));
 
-            // Start reels spinning
-            for (int i = 0; i < reelControllers.Length; i++)
-            {
-                SymbolType[] reelSymbols = new SymbolType[configuration.rowCount];
-                for (int j = 0; j < configuration.rowCount; j++)
-                {
-                    reelSymbols[j] = spinResult.Grid[i, j];
-                }
-
-                float delay = i * configuration.reelStopDelay;
-                reelControllers[i].Spin(reelSymbols, delay);
-            }
+            // Tell the view to spin the reels
+            slotMachineView.SpinReels(spinResult.Grid);
 
             // Wait for all reels to stop
             yield return new WaitForSeconds(configuration.spinDuration +
@@ -205,36 +191,27 @@ namespace SweetSpin.Core
         {
             if (result.IsWin)
             {
-                // Play win sound based on tier
+                // Determine win tier
                 WinTier tier = DetermineWinTier(result);
+
+                // Play appropriate sound
                 audioService.PlayWinSound(tier);
 
-                // Update win text
-                winText.text = result.GetWinMessage();
+                // Show win message with effects
+                slotMachineView.ShowWinMessage(result.GetWinMessage(), tier);
 
-                // Animate winning symbols
+                // Animate winning lines
                 foreach (var win in result.Wins)
                 {
-                    AnimateWinningLine(win);
+                    slotMachineView.AnimateWinningLine(win);
                 }
 
                 yield return new WaitForSeconds(2f);
             }
             else
             {
-                winText.text = "Try Again!";
+                slotMachineView.ShowWinMessage("Try Again!", WinTier.None);
                 yield return new WaitForSeconds(0.5f);
-            }
-        }
-
-        private void AnimateWinningLine(PaylineWin win)
-        {
-            for (int i = 0; i < win.matchCount; i++)
-            {
-                if (i < reelControllers.Length)
-                {
-                    reelControllers[i].AnimateSymbolAt(win.positions[i]);
-                }
             }
         }
 
@@ -273,14 +250,11 @@ namespace SweetSpin.Core
         // Event handlers
         private void OnSpinStarted(SpinStartedEvent e)
         {
-            spinButton.interactable = false;
-            winText.text = "Spinning...";
             audioService.PlaySpinSound();
         }
 
         private void OnSpinCompleted(SpinCompletedEvent e)
         {
-            spinButton.interactable = true;
             UpdateUI();
         }
 
@@ -303,14 +277,14 @@ namespace SweetSpin.Core
 
         private void UpdateUI()
         {
-            if (creditsText != null)
-                creditsText.text = $"Credits: {gameModel.Credits}";
-
-            if (betText != null)
-                betText.text = $"Bet: {gameModel.CurrentBet}";
-
-            if (linesText != null)
-                linesText.text = $"Lines: {configuration.paylineCount}";
+            if (slotMachineView != null)
+            {
+                slotMachineView.UpdateUI(
+                    gameModel.Credits,
+                    gameModel.CurrentBet,
+                    configuration.paylineCount
+                );
+            }
         }
 
         private void OnDestroy()
