@@ -1,68 +1,58 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace SweetSpin
 {
     /// <summary>
     /// Payline service implementation
+    /// Evaluates winning combinations across configured paylines
     /// </summary>
     public class PaylineService : IPaylineService
     {
         private PaylinePattern[] patterns;
         private SymbolData[] symbolDatabase;
 
-        // Standard 25 payline patterns
-        private static readonly int[,] defaultPatterns = new int[,]
-        {
-            {1, 1, 1, 1, 1}, // Middle line
-            {0, 0, 0, 0, 0}, // Top line
-            {2, 2, 2, 2, 2}, // Bottom line
-            {0, 1, 2, 1, 0}, // V-shape
-            {2, 1, 0, 1, 2}, // Inverted V
-            // ... add remaining 20 patterns
-        };
-
+        /// <summary>
+        /// Initialize with payline patterns from configuration
+        /// </summary>
         public void Initialize(PaylinePattern[] paylinePatterns)
         {
-            patterns = paylinePatterns;
-
-            // If no patterns provided, use defaults
-            if (patterns == null || patterns.Length == 0)
+            if (paylinePatterns == null || paylinePatterns.Length == 0)
             {
-                CreateDefaultPatterns();
+                Debug.LogError("PaylineService: No payline patterns provided! Service will not function correctly.");
+                patterns = new PaylinePattern[0];
+                return;
             }
+
+            patterns = paylinePatterns;
+            Debug.Log($"PaylineService initialized with {patterns.Length} paylines");
         }
 
+        /// <summary>
+        /// Initialize with symbol database for payout calculations
+        /// </summary>
         public void Initialize(SymbolData[] symbols)
         {
-            symbolDatabase = symbols;
-            CreateDefaultPatterns();
-        }
-
-        private void CreateDefaultPatterns()
-        {
-            patterns = new PaylinePattern[25];
-            for (int i = 0; i < 25; i++)
+            if (symbols == null || symbols.Length == 0)
             {
-                patterns[i] = new PaylinePattern
-                {
-                    index = i,
-                    name = $"Line {i + 1}",
-                    positions = new int[5]
-                };
-
-                // Copy from default patterns
-                for (int j = 0; j < 5; j++)
-                {
-                    patterns[i].positions[j] = i < defaultPatterns.GetLength(0)
-                        ? defaultPatterns[i, j]
-                        : 1; // Default to middle row
-                }
+                Debug.LogWarning("PaylineService: No symbol database provided. Will use fallback payouts.");
             }
+
+            symbolDatabase = symbols;
         }
 
+        /// <summary>
+        /// Evaluate all paylines for winning combinations
+        /// </summary>
         public List<PaylineWin> EvaluatePaylines(SymbolType[,] grid, int betPerLine)
         {
-            var wins = new System.Collections.Generic.List<PaylineWin>();
+            var wins = new List<PaylineWin>();
+
+            if (patterns == null || patterns.Length == 0)
+            {
+                Debug.LogError("PaylineService: Cannot evaluate paylines - no patterns loaded!");
+                return wins;
+            }
 
             foreach (var pattern in patterns)
             {
@@ -76,6 +66,9 @@ namespace SweetSpin
             return wins;
         }
 
+        /// <summary>
+        /// Check a single payline for winning combinations
+        /// </summary>
         private PaylineWin CheckPayline(PaylinePattern pattern, SymbolType[,] grid, int betPerLine)
         {
             // Get symbols along this payline
@@ -88,7 +81,7 @@ namespace SweetSpin
             // Check for winning combination
             SymbolType firstSymbol = lineSymbols[0];
 
-            // Skip if first symbol is Wild
+            // Skip if first symbol is Wild (Wilds don't start combinations)
             if (firstSymbol == SymbolType.Wild)
             {
                 for (int i = 1; i < 5; i++)
@@ -99,9 +92,15 @@ namespace SweetSpin
                         break;
                     }
                 }
+
+                // If all symbols are Wild, treat as Wild win
+                if (firstSymbol == SymbolType.Wild)
+                {
+                    // All wilds is a valid win
+                }
             }
 
-            // Count matches
+            // Count consecutive matches from left to right
             int matchCount = 1;
             for (int reel = 1; reel < 5; reel++)
             {
@@ -111,7 +110,7 @@ namespace SweetSpin
                 }
                 else
                 {
-                    break;
+                    break; // Stop at first non-matching symbol
                 }
             }
 
@@ -119,9 +118,6 @@ namespace SweetSpin
             if (matchCount >= 3)
             {
                 int winAmount = CalculateWinAmount(firstSymbol, matchCount, betPerLine);
-
-                // Replace the object initializer for PaylineWin in PaylineService.CheckPayline with a constructor call.
-                // The error occurs because PaylineWin requires a constructor with parameters, not an object initializer.
 
                 return new PaylineWin(
                     pattern.index,
@@ -135,10 +131,13 @@ namespace SweetSpin
             return null;
         }
 
+        /// <summary>
+        /// Calculate win amount based on symbol and match count
+        /// </summary>
         private int CalculateWinAmount(SymbolType symbol, int matchCount, int betPerLine)
         {
             // Get payout from symbol database
-            if (symbolDatabase != null)
+            if (symbolDatabase != null && symbolDatabase.Length > 0)
             {
                 var symbolData = System.Array.Find(symbolDatabase, s => s.type == symbol);
                 if (symbolData != null && matchCount - 3 < symbolData.payouts.Length)
@@ -147,8 +146,11 @@ namespace SweetSpin
                 }
             }
 
-            // Fallback payouts
-            int[,] defaultPayouts = {
+            // Fallback payouts if no symbol database
+            // This should ideally never be used in production
+            Debug.LogWarning($"PaylineService: Using fallback payout for {symbol} x{matchCount}");
+
+            int[,] fallbackPayouts = {
                 {5, 10, 20},    // Cherry
                 {10, 20, 40},   // Lemon
                 {15, 30, 60},   // Orange
@@ -160,17 +162,20 @@ namespace SweetSpin
             };
 
             int symbolIndex = (int)symbol;
-            if (symbolIndex < defaultPayouts.GetLength(0))
+            if (symbolIndex < fallbackPayouts.GetLength(0) && matchCount >= 3 && matchCount <= 5)
             {
-                return defaultPayouts[symbolIndex, matchCount - 3] * betPerLine;
+                return fallbackPayouts[symbolIndex, matchCount - 3] * betPerLine;
             }
 
             return 0;
         }
 
+        /// <summary>
+        /// Get the current number of paylines
+        /// </summary>
         public int GetPaylineCount()
         {
-            return patterns?.Length ?? 25;
+            return patterns?.Length ?? 0;
         }
     }
 }

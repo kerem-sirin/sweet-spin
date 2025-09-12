@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using static SweetSpin.Core.PaylineManager;
 
 namespace SweetSpin
 {

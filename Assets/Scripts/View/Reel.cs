@@ -5,6 +5,11 @@ using UnityEngine;
 
 namespace SweetSpin
 {
+    /// <summary>
+    /// Controls a single reel column in the slot machine.
+    /// Manages symbol creation, spinning animation, and final positioning.
+    /// Attached to each reel prefab instance.
+    /// </summary>
     public class Reel : MonoBehaviour
     {
         [Header("Reel Configuration")]
@@ -14,10 +19,9 @@ namespace SweetSpin
         [SerializeField] private int visibleSymbols = 3;
         [SerializeField] private int bufferSymbols = 2; // Extra symbols above and below for smooth spinning
 
-        [Header("Spin Configuration")]
-        [SerializeField] private float spinSpeed = 2000f;
-        [SerializeField] private float spinDuration = 2f;
-        [SerializeField] private float stopDelay = 0.3f; // Delay between each reel stopping
+        private float spinSpeed;
+        private float spinDuration;
+        private float stopDelay;
 
         private List<ReelSymbol> symbols = new List<ReelSymbol>();
         private SymbolData[] availableSymbols;
@@ -77,10 +81,17 @@ namespace SweetSpin
             }
         }
 
-        public void Initialize(int index, SymbolData[] symbolData)
+        public void Initialize(int index, SymbolData[] symbolData, float spinSpeed, float spinDuration, float stopDelay)
         {
             reelIndex = index;
             availableSymbols = symbolData;
+
+            // Set spin configuration
+            this.spinSpeed = spinSpeed;
+            this.spinDuration = spinDuration;
+            this.stopDelay = stopDelay;
+
+
             CreateSymbols();
             SetRandomSymbols();
             SnapToGrid();
@@ -138,12 +149,16 @@ namespace SweetSpin
             }
         }
 
-        public void Spin(SymbolType[] resultSymbols, float startDelay = 0f)
+        public void Spin(SymbolType[] resultSymbols, float startDelay = -1f)
         {
             if (isSpinning) return;
 
             targetSymbols = resultSymbols;
             isSpinning = true;
+
+            // Use the configured stopDelay if no override is provided
+            // This allows both: using the reel's default delay, or overriding per spin
+            float actualDelay = startDelay >= 0 ? startDelay : stopDelay * reelIndex;
 
             // Kill any existing spin sequence
             spinSequence?.Kill();
@@ -151,7 +166,7 @@ namespace SweetSpin
             spinSequence = DOTween.Sequence();
 
             // Add start delay for staggered reel starts
-            spinSequence.AppendInterval(startDelay);
+            spinSequence.AppendInterval(actualDelay);
 
             // Start spinning animation
             spinSequence.AppendCallback(() => StartSpinning());

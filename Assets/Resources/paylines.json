@@ -1,0 +1,154 @@
+{
+  "paylines": [
+    {
+      "index": 0,
+      "name": "Top Row",
+      "positions": [0, 0, 0, 0, 0],
+      "description": "Straight line across top row"
+    },
+    {
+      "index": 1,
+      "name": "Middle Row",
+      "positions": [1, 1, 1, 1, 1],
+      "description": "Straight line across middle row"
+    },
+    {
+      "index": 2,
+      "name": "Bottom Row",
+      "positions": [2, 2, 2, 2, 2],
+      "description": "Straight line across bottom row"
+    },
+    {
+      "index": 3,
+      "name": "V-Shape",
+      "positions": [0, 1, 2, 1, 0],
+      "description": "V pattern starting from top corners"
+    },
+    {
+      "index": 4,
+      "name": "Inverted V",
+      "positions": [2, 1, 0, 1, 2],
+      "description": "Inverted V starting from bottom corners"
+    },
+    {
+      "index": 5,
+      "name": "Diagonal Down",
+      "positions": [0, 1, 1, 1, 2],
+      "description": "Slight diagonal from top to bottom"
+    },
+    {
+      "index": 6,
+      "name": "Diagonal Up",
+      "positions": [2, 1, 1, 1, 0],
+      "description": "Slight diagonal from bottom to top"
+    },
+    {
+      "index": 7,
+      "name": "Zigzag",
+      "positions": [1, 0, 1, 2, 1],
+      "description": "Up and down pattern"
+    },
+    {
+      "index": 8,
+      "name": "Reverse Zigzag",
+      "positions": [1, 2, 1, 0, 1],
+      "description": "Down and up pattern"
+    },
+    {
+      "index": 9,
+      "name": "Top Zigzag",
+      "positions": [0, 1, 0, 1, 0],
+      "description": "Zigzag in upper half"
+    },
+    {
+      "index": 10,
+      "name": "Bottom Zigzag",
+      "positions": [2, 1, 2, 1, 2],
+      "description": "Zigzag in lower half"
+    },
+    {
+      "index": 11,
+      "name": "Dip Pattern",
+      "positions": [1, 0, 0, 0, 1],
+      "description": "Dips to top in middle"
+    },
+    {
+      "index": 12,
+      "name": "Rise Pattern",
+      "positions": [1, 2, 2, 2, 1],
+      "description": "Rises to bottom in middle"
+    },
+    {
+      "index": 13,
+      "name": "Step Down",
+      "positions": [0, 0, 1, 2, 2],
+      "description": "Steps down from left to right"
+    },
+    {
+      "index": 14,
+      "name": "Step Up",
+      "positions": [2, 2, 1, 0, 0],
+      "description": "Steps up from left to right"
+    },
+    {
+      "index": 15,
+      "name": "Jump Pattern",
+      "positions": [0, 2, 0, 2, 0],
+      "description": "Jumps between top and bottom"
+    },
+    {
+      "index": 16,
+      "name": "Reverse Jump",
+      "positions": [2, 0, 2, 0, 2],
+      "description": "Jumps between bottom and top"
+    },
+    {
+      "index": 17,
+      "name": "L-Shape",
+      "positions": [0, 1, 2, 2, 2],
+      "description": "L pattern going down then right"
+    },
+    {
+      "index": 18,
+      "name": "Inverted L",
+      "positions": [2, 1, 0, 0, 0],
+      "description": "Inverted L going up then right"
+    },
+    {
+      "index": 19,
+      "name": "Peak Pattern",
+      "positions": [0, 0, 1, 0, 0],
+      "description": "Small peak in the middle"
+    },
+    {
+      "index": 20,
+      "name": "Valley Pattern",
+      "positions": [2, 2, 1, 2, 2],
+      "description": "Small valley in the middle"
+    },
+    {
+      "index": 21,
+      "name": "Wide V Bottom",
+      "positions": [0, 2, 2, 2, 0],
+      "description": "Wide V touching bottom"
+    },
+    {
+      "index": 22,
+      "name": "Wide V Top",
+      "positions": [2, 0, 0, 0, 2],
+      "description": "Wide inverted V touching top"
+    },
+    {
+      "index": 23,
+      "name": "W-Shape",
+      "positions": [0, 2, 1, 0, 2],
+      "description": "W pattern"
+    },
+    {
+      "index": 24,
+      "name": "M-Shape",
+      "positions": [2, 0, 1, 2, 0],
+      "description": "M pattern"
+    }
+  ]
+}

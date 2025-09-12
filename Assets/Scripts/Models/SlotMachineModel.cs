@@ -63,7 +63,7 @@ namespace SweetSpin
             {
                 for (int row = 0; row < config.rowCount; row++)
                 {
-                    grid[reel, row] = randomService.GetRandomSymbol(config.symbolWeights);
+                    grid[reel, row] = randomService.GetRandomSymbol(config.SymbolWeights);
                 }
             }
 
