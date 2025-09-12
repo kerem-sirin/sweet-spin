@@ -1,16 +1,23 @@
-using SweetSpin.Core;
 using UnityEngine;
 
-namespace SweetSpin
+namespace SweetSpin.Core
 {
+    /// <summary>
+    /// Manages game state transitions and enforces valid state flow.
+    /// Ensures game logic executes in the correct sequence.
+    /// </summary>
     public class GameStateMachine
     {
         private readonly SlotMachineModel model;
         private readonly Reel[] reels;
         private readonly IEventBus eventBus;
 
+        /// <summary>Current state of the game</summary>
         public GameState CurrentState { get; private set; }
 
+        /// <summary>
+        /// Initializes the state machine with game components
+        /// </summary>
         public GameStateMachine(SlotMachineModel gameModel, Reel[] reelControllers, IEventBus events)
         {
             model = gameModel;
@@ -19,6 +26,9 @@ namespace SweetSpin
             CurrentState = GameState.Idle;
         }
 
+        /// <summary>
+        /// Transitions to a new state, triggering exit and enter logic
+        /// </summary>
         public void TransitionTo(GameState newState)
         {
             Debug.Log($"State transition: {CurrentState} -> {newState}");
@@ -31,6 +41,9 @@ namespace SweetSpin
             OnStateEnter(newState);
         }
 
+        /// <summary>
+        /// Executes logic when entering a state
+        /// </summary>
         private void OnStateEnter(GameState state)
         {
             switch (state)
@@ -50,6 +63,9 @@ namespace SweetSpin
             }
         }
 
+        /// <summary>
+        /// Executes cleanup logic when exiting a state
+        /// </summary>
         private void OnStateExit(GameState state)
         {
             // Cleanup for state exit

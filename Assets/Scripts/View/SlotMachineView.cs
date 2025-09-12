@@ -80,7 +80,7 @@ namespace SweetSpin.Core
                     controller = reelGO.AddComponent<Reel>();
 
                 // Initialize the controller
-                controller.Initialize(i, configuration.symbolDatabase);
+                controller.Initialize(i, configuration.symbolDatabase, configuration.spinSpeed, configuration.spinDuration, configuration.reelStopDelay);
                 reel[i] = controller;
             }
 

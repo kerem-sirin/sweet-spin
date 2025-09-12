@@ -4,6 +4,11 @@ using UnityEngine.UI;
 
 namespace SweetSpin
 {
+    /// <summary>
+    /// Represents a single symbol on a reel.
+    /// Handles symbol display and win animations.
+    /// Attached to each symbol prefab instance.
+    /// </summary>
     public class ReelSymbol : MonoBehaviour
     {
         [SerializeField] private Image symbolImage;
