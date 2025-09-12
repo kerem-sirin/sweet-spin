@@ -77,7 +77,7 @@ namespace SweetSpin
             }
         }
 
-        public void Initialize(SymbolData[] symbolData, int index)
+        public void Initialize(int index, SymbolData[] symbolData)
         {
             reelIndex = index;
             availableSymbols = symbolData;
@@ -275,6 +275,16 @@ namespace SweetSpin
             // Fallback: calculate position
             float yOffset = (row - 1) * -symbolHeight; // row 1 (middle) is at 0
             return transform.position + new Vector3(0, yOffset, 0);
+        }
+
+        // Add this method to Reel.cs
+        public void AnimateSymbolAt(int row)
+        {
+            var visibleSymbols = GetVisibleSymbols();
+            if (row >= 0 && row < visibleSymbols.Length)
+            {
+                visibleSymbols[row].AnimateWin();
+            }
         }
     }
 }
