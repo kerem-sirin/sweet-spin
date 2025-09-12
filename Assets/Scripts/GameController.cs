@@ -84,6 +84,7 @@ namespace SweetSpin.Core
 
                 // Initialize state machine with the view's reel controllers
                 stateMachine = new GameStateMachine(gameModel, slotMachineView.ReelControllers, eventBus);
+
             }
             else
             {
