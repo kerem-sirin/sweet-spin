@@ -1,0 +1,280 @@
+using DG.Tweening;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace SweetSpin
+{
+    public class Reel : MonoBehaviour
+    {
+        [Header("Reel Configuration")]
+        [SerializeField] private int reelIndex; // 0-4 for identifying which reel this is
+        [SerializeField] private GameObject symbolPrefab;
+        [SerializeField] private Transform symbolContainer;
+        [SerializeField] private int visibleSymbols = 3;
+        [SerializeField] private int bufferSymbols = 2; // Extra symbols above and below for smooth spinning
+
+        [Header("Spin Configuration")]
+        [SerializeField] private float spinSpeed = 2000f;
+        [SerializeField] private float spinDuration = 2f;
+        [SerializeField] private float stopDelay = 0.3f; // Delay between each reel stopping
+
+        private List<ReelSymbol> symbols = new List<ReelSymbol>();
+        private SymbolData[] availableSymbols;
+        private bool isSpinning = false;
+        private float currentPosition = 0;
+        private Sequence spinSequence;
+
+        // Dynamic symbol height - retrieved from prefab
+        private float symbolHeight = 150f; // Default fallback value
+
+        // Final symbols that will be shown when reel stops
+        private SymbolType[] targetSymbols = new SymbolType[3];
+
+        public bool IsSpinning => isSpinning;
+        public int ReelIndex => reelIndex;
+        public float SymbolHeight => symbolHeight;
+
+        private void Awake()
+        {
+            if (symbolContainer == null)
+                symbolContainer = transform;
+
+            // Get symbol height from prefab
+            if (symbolPrefab != null)
+            {
+                ReelSymbol prefabSymbol = symbolPrefab.GetComponent<ReelSymbol>();
+                if (prefabSymbol != null)
+                {
+                    // Instantiate temporarily to get the actual height
+                    GameObject tempSymbol = Instantiate(symbolPrefab, transform);
+                    RectTransform rt = tempSymbol.GetComponent<RectTransform>();
+                    if (rt != null)
+                    {
+                        // Force layout update to get accurate height
+                        Canvas.ForceUpdateCanvases();
+                        symbolHeight = rt.rect.height;
+
+                        // If height is 0 or negative, use the sizeDelta
+                        if (symbolHeight <= 0)
+                        {
+                            symbolHeight = rt.sizeDelta.y;
+                        }
+
+                        // If still invalid, use default
+                        if (symbolHeight <= 0)
+                        {
+                            Debug.LogWarning($"Could not get valid symbol height from prefab. Using default: 150");
+                            symbolHeight = 150f;
+                        }
+                        else
+                        {
+                            Debug.Log($"Reel {reelIndex}: Dynamic symbol height = {symbolHeight}");
+                        }
+                    }
+                    Destroy(tempSymbol);
+                }
+            }
+        }
+
+        public void Initialize(SymbolData[] symbolData, int index)
+        {
+            reelIndex = index;
+            availableSymbols = symbolData;
+            CreateSymbols();
+            SetRandomSymbols();
+            SnapToGrid();
+            Canvas.ForceUpdateCanvases();
+        }
+
+        private void CreateSymbols()
+        {
+            // Clear existing symbols
+            foreach (var symbol in symbols)
+            {
+                if (symbol != null)
+                    Destroy(symbol.gameObject);
+            }
+            symbols.Clear();
+
+            // Create symbols (visible + buffer)
+            int totalSymbols = visibleSymbols + (bufferSymbols * 2);
+            for (int i = 0; i < totalSymbols; i++)
+            {
+                GameObject symbolGO = Instantiate(symbolPrefab, symbolContainer);
+                ReelSymbol symbol = symbolGO.GetComponent<ReelSymbol>();
+
+                // Get the actual height from the first created symbol if not already set
+                if (i == 0 && symbolHeight <= 0)
+                {
+                    RectTransform firstRt = symbolGO.GetComponent<RectTransform>();
+                    Canvas.ForceUpdateCanvases();
+                    symbolHeight = firstRt.rect.height > 0 ? firstRt.rect.height : 150f;
+                    Debug.Log($"Symbol height retrieved from first instantiated symbol: {symbolHeight}");
+                }
+
+                // Position symbol using the dynamic height
+                RectTransform rt = symbolGO.GetComponent<RectTransform>();
+                float yPos = CalculateSymbolYPosition(i);
+                rt.anchoredPosition = new Vector2(0, yPos);
+
+                symbols.Add(symbol);
+            }
+        }
+
+        private float CalculateSymbolYPosition(int index)
+        {
+            // Calculate Y position based on index
+            // Center the visible symbols (index bufferSymbols to bufferSymbols+visibleSymbols-1 should be centered)
+            return (index - bufferSymbols - 1) * -symbolHeight;
+        }
+
+        private void SetRandomSymbols()
+        {
+            foreach (var symbol in symbols)
+            {
+                var randomSymbol = availableSymbols[Random.Range(0, availableSymbols.Length)];
+                symbol.SetSymbol(randomSymbol);
+            }
+        }
+
+        public void Spin(SymbolType[] resultSymbols, float startDelay = 0f)
+        {
+            if (isSpinning) return;
+
+            targetSymbols = resultSymbols;
+            isSpinning = true;
+
+            // Kill any existing spin sequence
+            spinSequence?.Kill();
+
+            spinSequence = DOTween.Sequence();
+
+            // Add start delay for staggered reel starts
+            spinSequence.AppendInterval(startDelay);
+
+            // Start spinning animation
+            spinSequence.AppendCallback(() => StartSpinning());
+
+            // Spin for duration
+            spinSequence.AppendInterval(spinDuration);
+
+            // Stop and snap to result
+            spinSequence.AppendCallback(() => StopSpinning());
+        }
+
+        private void StartSpinning()
+        {
+            StartCoroutine(SpinAnimation());
+        }
+
+        private IEnumerator SpinAnimation()
+        {
+            while (isSpinning)
+            {
+                // Move all symbols down
+                currentPosition += spinSpeed * Time.deltaTime;
+
+                foreach (var symbol in symbols)
+                {
+                    RectTransform rt = symbol.RectTransform;
+                    Vector2 pos = rt.anchoredPosition;
+                    pos.y -= spinSpeed * Time.deltaTime;
+
+                    // Calculate wrap-around threshold using dynamic height
+                    float wrapThreshold = -(bufferSymbols + visibleSymbols - 1) * symbolHeight;
+                    float wrapDistance = symbols.Count * symbolHeight;
+
+                    // Wrap around when symbol goes too far down
+                    if (pos.y < wrapThreshold)
+                    {
+                        pos.y += wrapDistance;
+                        // Set new random symbol when wrapping
+                        var randomSymbol = availableSymbols[Random.Range(0, availableSymbols.Length)];
+                        symbol.SetSymbol(randomSymbol);
+                    }
+
+                    rt.anchoredPosition = pos;
+                }
+
+                yield return null;
+            }
+        }
+
+        private void StopSpinning()
+        {
+            StopAllCoroutines();
+
+            // Set the target symbols to the visible positions
+            for (int i = 0; i < visibleSymbols; i++)
+            {
+                if (i < targetSymbols.Length && i + bufferSymbols < symbols.Count)
+                {
+                    var targetSymbolData = System.Array.Find(availableSymbols, s => s.type == targetSymbols[i]);
+                    if (targetSymbolData != null)
+                    {
+                        symbols[i + bufferSymbols].SetSymbol(targetSymbolData);
+                    }
+                }
+            }
+
+            // Snap positions to grid
+            SnapToGrid();
+
+            isSpinning = false;
+        }
+
+        private void SnapToGrid()
+        {
+            float snapDuration = 0.3f;
+            for (int i = 0; i < symbols.Count; i++)
+            {
+                RectTransform rt = symbols[i].RectTransform;
+                float targetY = CalculateSymbolYPosition(i);
+
+                // Animate snap to position
+                rt.DOAnchorPosY(targetY, snapDuration)
+                    .SetEase(Ease.OutBounce);
+            }
+        }
+
+        public ReelSymbol[] GetVisibleSymbols()
+        {
+            List<ReelSymbol> visible = new List<ReelSymbol>();
+            for (int i = bufferSymbols; i < bufferSymbols + visibleSymbols; i++)
+            {
+                if (i < symbols.Count)
+                    visible.Add(symbols[i]);
+            }
+            return visible.ToArray();
+        }
+
+        public SymbolType GetSymbolAt(int row)
+        {
+            if (row < 0 || row >= visibleSymbols) return SymbolType.Cherry;
+
+            int index = bufferSymbols + row;
+            if (index < symbols.Count)
+                return symbols[index].Type;
+
+            return SymbolType.Cherry;
+        }
+
+        // Helper method to get world position of a symbol at a specific row (useful for line rendering)
+        public Vector3 GetSymbolWorldPosition(int row)
+        {
+            if (row < 0 || row >= visibleSymbols)
+                return transform.position;
+
+            int index = bufferSymbols + row;
+            if (index < symbols.Count && symbols[index] != null)
+            {
+                return symbols[index].transform.position;
+            }
+
+            // Fallback: calculate position
+            float yOffset = (row - 1) * -symbolHeight; // row 1 (middle) is at 0
+            return transform.position + new Vector3(0, yOffset, 0);
+        }
+    }
+}
