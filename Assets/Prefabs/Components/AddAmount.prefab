@@ -297,7 +297,7 @@ GameObject:
   - component: {fileID: 8683516030102564674}
   - component: {fileID: 5331498986309642351}
   m_Layer: 5
-  m_Name: SelecetAmount
+  m_Name: AddAmount
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
