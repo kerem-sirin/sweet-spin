@@ -13,6 +13,7 @@ namespace SweetSpin
         [SerializeField] private Transform payoutContainer;
         [SerializeField] private Button togglePaytableButton;
         [SerializeField] private Button closePaytableButton;
+        [SerializeField] private Button backgroundAsButton;
 
         [Header("Prefabs")]
         [SerializeField] private GameObject paytableEntryPrefab;
@@ -27,13 +28,24 @@ namespace SweetSpin
         private void Start()
         {
             if (togglePaytableButton != null)
+            {
                 togglePaytableButton.onClick.AddListener(TogglePaytable);
+            }
 
             if (closePaytableButton != null)
+            {
                 closePaytableButton.onClick.AddListener(HidePaytable);
+            }
+
+            if (backgroundAsButton != null)
+            {
+                backgroundAsButton.onClick.AddListener(HidePaytable);
+            }
 
             if (paytablePanel != null)
+            {
                 paytablePanel.SetActive(false);
+            }
         }
 
         public void Initialize(SlotMachineConfiguration config)
@@ -45,10 +57,20 @@ namespace SweetSpin
         private void OnDestroy()
         {
             if (togglePaytableButton != null)
+            {
                 togglePaytableButton.onClick.RemoveListener(TogglePaytable);
+            }
+
 
             if (closePaytableButton != null)
+            {
                 closePaytableButton.onClick.RemoveListener(HidePaytable);
+            }
+
+            if (backgroundAsButton != null)
+            {
+                backgroundAsButton.onClick.RemoveListener(HidePaytable);
+            }
         }
 
         private void CreatePaytableEntries()

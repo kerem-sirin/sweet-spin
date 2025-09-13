@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: 6a2920e472b6a684a98325d51294ed3a
+guid: 04e64157bea72f74a8bb8cac887bfd43
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1161201145128540330
-    second: Icons_0
+      213: -7062312108146284549
+    second: PigBody_0
+  - first:
+      213: 7050610580560607254
+    second: PigBody_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +49,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -126,13 +129,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Icons_0
+      name: PigBody_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 10
-        width: 252
-        height: 239
+        y: 0
+        width: 523
+        height: 525
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +144,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: aa8d9280a4a6d1010800000000000000
-      internalID: 1161201145128540330
+      spriteID: bf7200d2e80adfd90800000000000000
+      internalID: -7062312108146284549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PigBody_1
+      rect:
+        serializedVersion: 2
+        x: 532
+        y: 75
+        width: 14
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 618fcef97fcc8d160800000000000000
+      internalID: 7050610580560607254
       vertices: []
       indices: 
       edges: []
@@ -151,7 +176,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +186,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Icons_0: 1161201145128540330
+      PigBody_0: -7062312108146284549
+      PigBody_1: 7050610580560607254
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

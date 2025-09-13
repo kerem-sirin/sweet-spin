@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using DG.Tweening;
 
 namespace SweetSpin.Core
 {
@@ -59,6 +58,8 @@ namespace SweetSpin.Core
             {
                 paytableDisplay.Initialize(configuration);
             }
+
+            winText.text = "";
         }
 
         private void CreateReels()
@@ -152,20 +153,16 @@ namespace SweetSpin.Core
             {
                 case WinTier.Jackpot:
                     winText.color = new Color(1f, 0.84f, 0f); // Gold
-                    AnimateJackpot();
                     break;
                 case WinTier.Mega:
-                    winText.color = new Color(1f, 0f, 1f); // Magenta
-                    AnimateMegaWin();
+                    winText.color = new Color(1f, 0f, 1f); // Magenta;
                     break;
                 case WinTier.Big:
                     winText.color = new Color(0f, 1f, 1f); // Cyan
-                    AnimateBigWin();
                     break;
                 case WinTier.Small:
                 case WinTier.Medium:
                     winText.color = new Color(0f, 1f, 0f); // Green
-                    AnimateWin();
                     break;
                 default:
                     winText.color = Color.white;
@@ -190,54 +187,6 @@ namespace SweetSpin.Core
             // DrawWinLine(win.positions);
         }
 
-        // Visual effect methods
-        private void AnimateWin()
-        {
-            winText.transform.DOScale(1.1f, 0.3f)
-                .SetLoops(2, LoopType.Yoyo);
-
-            if (winParticles != null)
-                winParticles.Play();
-        }
-
-        private void AnimateBigWin()
-        {
-            winText.transform.DOScale(1.2f, 0.3f)
-                .SetLoops(2, LoopType.Yoyo);
-
-            if (winParticles != null)
-            {
-                winParticles.Play();
-                // Could modify particle settings for bigger effect
-            }
-        }
-
-        private void AnimateMegaWin()
-        {
-            winText.transform.DOScale(1.3f, 0.4f)
-                .SetLoops(3, LoopType.Yoyo)
-                .SetEase(Ease.OutBounce);
-
-            if (winParticles != null)
-            {
-                winParticles.Play();
-            }
-        }
-
-        private void AnimateJackpot()
-        {
-            winText.transform.DOScale(1.5f, 0.5f)
-                .SetLoops(4, LoopType.Yoyo)
-                .SetEase(Ease.OutElastic);
-
-            if (winParticles != null)
-            {
-                winParticles.Play();
-            }
-
-            // Could add screen shake or other dramatic effects
-        }
-
         // Event handlers
         private void OnSpinStarted(SpinStartedEvent e)
         {
@@ -249,6 +198,7 @@ namespace SweetSpin.Core
             if (winText != null)
             {
                 winText.text = "Spinning...";
+                winText.color = Color.white;
             }
         }
 

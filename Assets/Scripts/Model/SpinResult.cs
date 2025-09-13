@@ -133,36 +133,38 @@ namespace SweetSpin.Core
         {
             if (!IsWin) return "Try Again!";
 
-            string message = "";
+            string debugMessage = "";
 
             // Add tier description
             string tier = GetWinTierDescription();
             if (!string.IsNullOrEmpty(tier))
             {
-                message = tier + "\n";
+                debugMessage = tier + "\n";
             }
 
             // Add win details
             if (TotalWinningLines == 1)
             {
                 var win = Wins[0];
-                message += $"{win.matchCount}x {win.symbol}\n";
+                debugMessage += $"{win.matchCount}x {win.symbol}\n";
             }
             else if (TotalWinningLines > 1)
             {
-                message += $"{TotalWinningLines} WINNING LINES!\n";
+                debugMessage += $"{TotalWinningLines} WINNING LINES!\n";
             }
 
             // Add total win
-            message += $"WIN: {TotalWin} CREDITS";
+            debugMessage += $"WIN: {TotalWin} CREDITS";
 
             // Add multiplier for big wins
             if (IsBigWin)
             {
-                message += $"\n({GetWinMultiplier():F1}x BET)";
+                debugMessage += $"\n({GetWinMultiplier():F1}x BET)";
             }
 
-            return message;
+            Debug.Log(debugMessage);
+
+            return TotalWin.ToString();
         }
 
         /// <summary>
