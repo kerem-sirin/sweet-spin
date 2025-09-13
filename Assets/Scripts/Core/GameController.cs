@@ -119,6 +119,7 @@ namespace SweetSpin.Core
             eventBus.Subscribe<SpinCompletedEvent>(OnSpinCompleted);
             eventBus.Subscribe<CreditsChangedEvent>(OnCreditsChanged);
             eventBus.Subscribe<ReelStoppedEvent>(OnReelStopped);
+            eventBus.Subscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
         }
 
         private void OnSpinButtonClick()
@@ -133,7 +134,11 @@ namespace SweetSpin.Core
 
             if (!gameModel.CanSpin())
             {
-                slotMachineView.ShowWinMessage("Not enough credits!", WinTier.None);
+                // Publish event
+                eventBus.Publish(new InsufficientCreditsEvent(
+                    gameModel.CurrentBet,
+                    gameModel.Credits
+                ));
                 return;
             }
 
@@ -276,14 +281,31 @@ namespace SweetSpin.Core
             UpdateUI();
         }
 
+        private void ModifyCredits(int amount)
+        {
+            if (gameModel == null) return;
+
+            gameModel.AddCredits(amount);
+            saveService?.SaveCredits(gameModel.Credits);
+            UpdateUI();
+        }
+
+        private void OnAddCreditsRequest(AddCreditsRequestEvent e)
+        {
+            int previousCredits = gameModel.Credits;
+            ModifyCredits(e.Amount);
+
+            eventBus.Publish(new CreditsChangedEvent(previousCredits, gameModel.Credits));
+            slotMachineView.ShowWinMessage($"+{e.Amount} Credits!", WinTier.Small);
+        }
+
         private void UpdateUI()
         {
             if (slotMachineView != null)
             {
                 slotMachineView.UpdateUI(
                     gameModel.Credits,
-                    gameModel.CurrentBet,
-                    configuration.paylineCount
+                    gameModel.CurrentBet
                 );
             }
         }
@@ -297,6 +319,7 @@ namespace SweetSpin.Core
                 eventBus.Unsubscribe<SpinCompletedEvent>(OnSpinCompleted);
                 eventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
                 eventBus.Unsubscribe<ReelStoppedEvent>(OnReelStopped);
+                eventBus?.Unsubscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
             }
 
             // Save game state
@@ -304,6 +327,36 @@ namespace SweetSpin.Core
             {
                 saveService.SaveCredits(gameModel.Credits);
             }
+        }
+
+        [ContextMenu("Debug/Add 100 Credits")]
+        private void Add100Credits() => AddDebugCredits(100);
+
+        [ContextMenu("Debug/Add 1000 Credits")]
+        private void Add1000Credits() => AddDebugCredits(1000);
+
+        [ContextMenu("Debug/Remove 100 Credits")]
+        private void Remove100Credits() => AddDebugCredits(-100);
+
+        [ContextMenu("Debug/Remove 1000 Credits")]
+        private void Remove1000Credits() => AddDebugCredits(-1000);
+
+        [ContextMenu("Debug/Reset to Starting Credits")]
+        private void ResetCredits()
+        {
+            if (gameModel != null && configuration != null)
+            {
+                gameModel.SetCredits(configuration.startingCredits);
+                saveService?.SaveCredits(gameModel.Credits);
+                UpdateUI();
+                Debug.Log("Reset to starting credits: " + configuration.startingCredits);
+            }
+        }
+
+        private void AddDebugCredits(int amount)
+        {
+            ModifyCredits(amount);
+            Debug.Log($"Added {amount} credits. New balance: {gameModel.Credits}");
         }
     }
 }

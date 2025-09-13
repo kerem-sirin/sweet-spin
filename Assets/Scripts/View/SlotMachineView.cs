@@ -1,8 +1,6 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using DG.Tweening;
 
 namespace SweetSpin.Core
 {
@@ -24,7 +22,10 @@ namespace SweetSpin.Core
         [SerializeField] private TextMeshProUGUI creditsText;
         [SerializeField] private TextMeshProUGUI betText;
         [SerializeField] private TextMeshProUGUI winText;
-        [SerializeField] private TextMeshProUGUI linesText;
+
+        [Header("Additional UI")]
+        [SerializeField] private PaytableDisplay paytableDisplay;
+        [SerializeField] private CreditPurchasePanel creditPurchasePanel;
 
         [Header("Visual Effects")]
         [SerializeField] private ParticleSystem winParticles;
@@ -53,6 +54,13 @@ namespace SweetSpin.Core
 
             CreateReels();
             SetupEventListeners();
+
+            if (paytableDisplay != null)
+            {
+                paytableDisplay.Initialize(configuration);
+            }
+
+            winText.text = "";
         }
 
         private void CreateReels()
@@ -96,6 +104,16 @@ namespace SweetSpin.Core
                 eventBus.Subscribe<SpinCompletedEvent>(OnSpinCompleted);
                 eventBus.Subscribe<CreditsChangedEvent>(OnCreditsChanged);
             }
+
+            eventBus.Subscribe<InsufficientCreditsEvent>(OnInsufficientCredits);
+        }
+
+        private void OnInsufficientCredits(InsufficientCreditsEvent e)
+        {
+            if (creditPurchasePanel != null)
+            {
+                creditPurchasePanel.Show();
+            }
         }
 
         /// <summary>
@@ -119,16 +137,17 @@ namespace SweetSpin.Core
         /// <summary>
         /// Update UI text displays
         /// </summary>
-        public void UpdateUI(int credits, int bet, int lines)
+        public void UpdateUI(int credits, int bet)
         {
             if (creditsText != null)
-                creditsText.text = $"Credits: {credits}";
+            {
+                creditsText.text = credits.ToString();
+            }
 
             if (betText != null)
-                betText.text = $"Bet: {bet}";
-
-            if (linesText != null)
-                linesText.text = $"Lines: {lines}";
+            {
+                betText.text = bet.ToString();
+            }
         }
 
         /// <summary>
@@ -145,20 +164,18 @@ namespace SweetSpin.Core
             {
                 case WinTier.Jackpot:
                     winText.color = new Color(1f, 0.84f, 0f); // Gold
-                    AnimateJackpot();
                     break;
                 case WinTier.Mega:
-                    winText.color = new Color(1f, 0f, 1f); // Magenta
-                    AnimateMegaWin();
+                    winText.color = new Color(1f, 0f, 1f); // Magenta;
                     break;
                 case WinTier.Big:
                     winText.color = new Color(0f, 1f, 1f); // Cyan
-                    AnimateBigWin();
                     break;
                 case WinTier.Small:
+                    winText.color = Color.white;
+                    break;
                 case WinTier.Medium:
                     winText.color = new Color(0f, 1f, 0f); // Green
-                    AnimateWin();
                     break;
                 default:
                     winText.color = Color.white;
@@ -183,64 +200,27 @@ namespace SweetSpin.Core
             // DrawWinLine(win.positions);
         }
 
-        // Visual effect methods
-        private void AnimateWin()
-        {
-            winText.transform.DOScale(1.1f, 0.3f)
-                .SetLoops(2, LoopType.Yoyo);
-
-            if (winParticles != null)
-                winParticles.Play();
-        }
-
-        private void AnimateBigWin()
-        {
-            winText.transform.DOScale(1.2f, 0.3f)
-                .SetLoops(2, LoopType.Yoyo);
-
-            if (winParticles != null)
-            {
-                winParticles.Play();
-                // Could modify particle settings for bigger effect
-            }
-        }
-
-        private void AnimateMegaWin()
-        {
-            winText.transform.DOScale(1.3f, 0.4f)
-                .SetLoops(3, LoopType.Yoyo)
-                .SetEase(Ease.OutBounce);
-
-            if (winParticles != null)
-                winParticles.Play();
-        }
-
-        private void AnimateJackpot()
-        {
-            winText.transform.DOScale(1.5f, 0.5f)
-                .SetLoops(4, LoopType.Yoyo)
-                .SetEase(Ease.OutElastic);
-
-            if (winParticles != null)
-                winParticles.Play();
-
-            // Could add screen shake or other dramatic effects
-        }
-
         // Event handlers
         private void OnSpinStarted(SpinStartedEvent e)
         {
             if (spinButton != null)
+            {
                 spinButton.interactable = false;
+            }
 
             if (winText != null)
+            {
                 winText.text = "Spinning...";
+                winText.color = Color.white;
+            }
         }
 
         private void OnSpinCompleted(SpinCompletedEvent e)
         {
             if (spinButton != null)
+            {
                 spinButton.interactable = true;
+            }
         }
 
         private void OnCreditsChanged(CreditsChangedEvent e)
@@ -249,7 +229,7 @@ namespace SweetSpin.Core
             if (creditsText != null)
             {
                 // Simple update for now
-                creditsText.text = $"Credits: {e.NewCredits}";
+                creditsText.text = e.NewCredits.ToString();
             }
         }
 

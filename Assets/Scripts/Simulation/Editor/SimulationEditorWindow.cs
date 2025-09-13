@@ -21,6 +21,7 @@ namespace SweetSpin.Simulation.Editor
         private int betPerLine = 1;
         private int maxTurns = 1000;
         private int simulationCount = 1; // Number of simulations to run
+        private bool saveTurnDetails = true; // Whether to save individual turn results
 
         // Results display
         private string lastResultPath = "";
@@ -117,6 +118,11 @@ namespace SweetSpin.Simulation.Editor
             );
             simulationCount = Mathf.Clamp(simulationCount, 1, 100); // Limit to 100 for safety
 
+            saveTurnDetails = EditorGUILayout.Toggle(
+                new GUIContent("Save Turn Details", "Save individual turn results in JSON (increases file size)"),
+                saveTurnDetails
+            );
+
             if (configuration != null)
             {
                 int totalBetPerSpin = betPerLine * configuration.paylineCount;
@@ -125,6 +131,11 @@ namespace SweetSpin.Simulation.Editor
                 if (simulationCount > 1)
                 {
                     EditorGUILayout.HelpBox($"Will run {simulationCount} simulations consecutively", MessageType.Info);
+                }
+
+                if (!saveTurnDetails)
+                {
+                    EditorGUILayout.HelpBox("Turn details will not be saved - only aggregate statistics", MessageType.Info);
                 }
             }
 
@@ -331,9 +342,9 @@ namespace SweetSpin.Simulation.Editor
                         }
                     }
 
-                    // Run individual simulation
+                    // Run individual simulation with saveTurnDetails parameter
                     var controller = new SimulationController(configuration);
-                    var report = controller.RunSimulation(startingCredits, betPerLine, maxTurns);
+                    var report = controller.RunSimulation(startingCredits, betPerLine, maxTurns, saveTurnDetails);
 
                     // Save results
                     string resultPath = SimulationFileManager.SaveSimulationReport(report);
