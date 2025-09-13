@@ -15,6 +15,7 @@ MonoBehaviour:
   reelCount: 5
   rowCount: 3
   reelSpacing: 160
+  spinSpeed: 1600
   spinDuration: 2
   reelStopDelay: 0.3
   symbolDatabase:
@@ -42,84 +43,7 @@ MonoBehaviour:
   - type: 7
     sprite: {fileID: -5704953304545078335, guid: 7a86c193fb2fac140aa0e3d8e5a47873, type: 3}
     payouts: 64000000c8000000f4010000
-  symbolWeights: 1e00000019000000140000000f0000000a000000080000000500000003000000
-  paylineCount: 25
-  paylinePatterns:
-  - index: 0
-    positions: 0000000000000000000000000000000000000000
-    name: Top row
-  - index: 1
-    positions: 0100000001000000010000000100000001000000
-    name: Middle row
-  - index: 2
-    positions: 0200000002000000020000000200000002000000
-    name: Bottom row
-  - index: 3
-    positions: 0000000001000000020000000100000000000000
-    name: V-shape
-  - index: 4
-    positions: 0200000001000000000000000100000002000000
-    name: Inverted V
-  - index: 5
-    positions: 0000000001000000010000000100000002000000
-    name: Slight diagonal
-  - index: 6
-    positions: 0200000001000000010000000100000000000000
-    name: Opposite diagonal
-  - index: 7
-    positions: 0100000000000000010000000200000001000000
-    name: Zigzag
-  - index: 8
-    positions: 0100000002000000010000000000000001000000
-    name: Reverse zigzag
-  - index: 9
-    positions: 0000000001000000000000000100000000000000
-    name: Top zigzag
-  - index: 10
-    positions: 0100000002000000010000000200000001000000
-    name: Bottom zigzag
-  - index: 11
-    positions: 0100000000000000000000000000000001000000
-    name: Dip pattern
-  - index: 12
-    positions: 0100000002000000020000000200000001000000
-    name: Rise pattern
-  - index: 13
-    positions: 0000000000000000010000000200000002000000
-    name: Step down
-  - index: 14
-    positions: 0200000002000000010000000000000000000000
-    name: Step up
-  - index: 15
-    positions: 0000000002000000000000000200000000000000
-    name: Jump pattern
-  - index: 16
-    positions: 0200000000000000020000000000000002000000
-    name: Reverse jump
-  - index: 17
-    positions: 0000000001000000020000000200000002000000
-    name: L-shape
-  - index: 18
-    positions: 0200000001000000000000000000000000000000
-    name: Inverted L
-  - index: 19
-    positions: 0000000000000000010000000000000000000000
-    name: Peak pattern
-  - index: 20
-    positions: 0200000002000000010000000200000002000000
-    name: Valley pattern
-  - index: 21
-    positions: 0000000002000000020000000200000000000000
-    name: Wide V bottom
-  - index: 22
-    positions: 0200000000000000000000000000000002000000
-    name: Wide V top
-  - index: 23
-    positions: 0000000002000000010000000000000002000000
-    name: Wide V top
-  - index: 24
-    positions: 0200000000000000010000000200000000000000
-    name: M-shape
+  paylineJSONFile: {fileID: 4900000, guid: becf426f39d001149858dbe43587227f, type: 3}
   startingCredits: 1000
   minBetPerLine: 1
   maxBetPerLine: 10
