@@ -24,6 +24,9 @@ namespace SweetSpin.Core
         [SerializeField] private TextMeshProUGUI betText;
         [SerializeField] private TextMeshProUGUI winText;
 
+        [Header("Additional UI")]
+        [SerializeField] private PaytableDisplay paytableDisplay;
+
         [Header("Visual Effects")]
         [SerializeField] private ParticleSystem winParticles;
         [SerializeField] private GameObject winLineRenderer;
@@ -51,6 +54,11 @@ namespace SweetSpin.Core
 
             CreateReels();
             SetupEventListeners();
+
+            if (paytableDisplay != null)
+            {
+                paytableDisplay.Initialize(configuration);
+            }
         }
 
         private void CreateReels()
