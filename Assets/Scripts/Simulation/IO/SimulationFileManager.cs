@@ -1,11 +1,14 @@
+using SweetSpin.Simulation.Data;
 using System;
 using System.IO;
 using UnityEngine;
 
-namespace SweetSpin.Simulation
+namespace SweetSpin.Simulation.IO
 {
     /// <summary>
-    /// Handles saving and loading simulation results
+    /// Handles persistence operations for simulation data including JSON serialization,
+    /// timestamped file generation, results archival, and cleanup utilities.
+    /// Manages the SimulationResults directory structure and file lifecycle.
     /// </summary>
     public static class SimulationFileManager
     {

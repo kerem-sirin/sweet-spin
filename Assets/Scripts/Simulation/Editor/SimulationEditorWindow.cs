@@ -1,13 +1,17 @@
-using UnityEngine;
-using UnityEditor;
 using SweetSpin.Core;
+using SweetSpin.Simulation.Core;
+using SweetSpin.Simulation.Data;
+using SweetSpin.Simulation.IO;
 using System.Diagnostics;
-using Debug = UnityEngine.Debug;
+using UnityEditor;
+using UnityEngine;
 
-namespace SweetSpin.Simulation
+namespace SweetSpin.Simulation.Editor
 {
     /// <summary>
-    /// Unity Editor window for running slot machine simulations
+    /// Unity Editor GUI for configuring and executing slot machine simulations.
+    /// Provides parameter configuration, real-time result visualization, and
+    /// statistical analysis display. Accessible via Tools menu for QA and balancing.
     /// </summary>
     public class SimulationEditorWindow : EditorWindow
     {
@@ -16,12 +20,14 @@ namespace SweetSpin.Simulation
         private int startingCredits = 1000;
         private int betPerLine = 1;
         private int maxTurns = 1000;
+        private int simulationCount = 1; // Number of simulations to run
 
         // Results display
         private string lastResultPath = "";
         private SimulationReport lastReport;
         private Vector2 scrollPosition;
         private bool showDetailedStats = false;
+        private string[] batchResultPaths; // Store paths for batch runs
 
         [MenuItem("Tools/Sweet Spin/Simulation Runner")]
         public static void ShowWindow()
@@ -105,10 +111,21 @@ namespace SweetSpin.Simulation
             );
             maxTurns = Mathf.Max(10, maxTurns);
 
+            simulationCount = EditorGUILayout.IntField(
+                new GUIContent("Simulation Count", "Number of simulations to run consecutively"),
+                simulationCount
+            );
+            simulationCount = Mathf.Clamp(simulationCount, 1, 100); // Limit to 100 for safety
+
             if (configuration != null)
             {
                 int totalBetPerSpin = betPerLine * configuration.paylineCount;
                 EditorGUILayout.HelpBox($"Total bet per spin: {totalBetPerSpin} credits", MessageType.Info);
+
+                if (simulationCount > 1)
+                {
+                    EditorGUILayout.HelpBox($"Will run {simulationCount} simulations consecutively", MessageType.Info);
+                }
             }
 
             EditorGUILayout.Space(10);
@@ -280,28 +297,98 @@ namespace SweetSpin.Simulation
                 return;
             }
 
-            // Start timer
-            var stopwatch = Stopwatch.StartNew();
+            // Start timer for all simulations
+            var totalStopwatch = Stopwatch.StartNew();
 
-            // Run simulation
-            var controller = new SimulationController(configuration);
-            lastReport = controller.RunSimulation(startingCredits, betPerLine, maxTurns);
+            // Track results for batch runs
+            batchResultPaths = new string[simulationCount];
+            float totalRtp = 0;
+            float totalHitFreq = 0;
 
-            // Save results
-            lastResultPath = SimulationFileManager.SaveSimulationReport(lastReport);
+            // Progress bar title
+            string progressTitle = simulationCount > 1 ?
+                $"Running {simulationCount} Simulations" :
+                "Running Simulation";
 
-            stopwatch.Stop();
+            try
+            {
+                for (int i = 0; i < simulationCount; i++)
+                {
+                    // Show progress bar for batch runs
+                    if (simulationCount > 1)
+                    {
+                        float progress = (float)i / simulationCount;
+                        if (EditorUtility.DisplayCancelableProgressBar(
+                            progressTitle,
+                            $"Simulation {i + 1} of {simulationCount}",
+                            progress))
+                        {
+                            // User cancelled
+                            EditorUtility.ClearProgressBar();
+                            EditorUtility.DisplayDialog("Cancelled",
+                                $"Simulation cancelled after {i} runs", "OK");
+                            break;
+                        }
+                    }
+
+                    // Run individual simulation
+                    var controller = new SimulationController(configuration);
+                    var report = controller.RunSimulation(startingCredits, betPerLine, maxTurns);
+
+                    // Save results
+                    string resultPath = SimulationFileManager.SaveSimulationReport(report);
+                    batchResultPaths[i] = resultPath;
+
+                    // Track aggregate stats
+                    totalRtp += report.rtp;
+                    totalHitFreq += report.statistics.hitFrequency;
+
+                    // Store last report for display
+                    lastReport = report;
+                    lastResultPath = resultPath;
+
+                    // Small delay between simulations to prevent file naming conflicts
+                    if (i < simulationCount - 1)
+                    {
+                        System.Threading.Thread.Sleep(1000); // 1 second delay
+                    }
+                }
+            }
+            finally
+            {
+                // Always clear progress bar
+                EditorUtility.ClearProgressBar();
+            }
+
+            totalStopwatch.Stop();
 
             // Show completion dialog
-            string message = $"Simulation completed in {stopwatch.ElapsedMilliseconds}ms\n\n" +
-                           $"Turns: {lastReport.totalTurns}\n" +
-                           $"RTP: {lastReport.rtp:F2}%\n" +
-                           $"Hit Frequency: {lastReport.statistics.hitFrequency:F2}%\n\n" +
-                           $"Results saved to:\n{lastResultPath}";
+            string message;
+            if (simulationCount == 1)
+            {
+                message = $"Simulation completed in {totalStopwatch.ElapsedMilliseconds}ms\n\n" +
+                         $"Turns: {lastReport.totalTurns}\n" +
+                         $"RTP: {lastReport.rtp:F2}%\n" +
+                         $"Hit Frequency: {lastReport.statistics.hitFrequency:F2}%\n\n" +
+                         $"Results saved to:\n{lastResultPath}";
+            }
+            else
+            {
+                // Calculate averages for batch
+                float avgRtp = totalRtp / simulationCount;
+                float avgHitFreq = totalHitFreq / simulationCount;
+
+                message = $"{simulationCount} simulations completed in {totalStopwatch.ElapsedMilliseconds}ms\n\n" +
+                         $"Average RTP: {avgRtp:F2}%\n" +
+                         $"Average Hit Frequency: {avgHitFreq:F2}%\n" +
+                         $"Time per simulation: {totalStopwatch.ElapsedMilliseconds / simulationCount}ms\n\n" +
+                         $"Results saved to SimulationResults folder\n" +
+                         $"Last file: {System.IO.Path.GetFileName(lastResultPath)}";
+            }
 
             EditorUtility.DisplayDialog("Simulation Complete", message, "OK");
 
-            // Refresh the asset database to show the new file
+            // Refresh the asset database to show the new files
             AssetDatabase.Refresh();
         }
 

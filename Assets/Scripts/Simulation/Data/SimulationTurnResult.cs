@@ -1,9 +1,11 @@
 using System;
 
-namespace SweetSpin.Simulation
+namespace SweetSpin.Simulation.Data
 {
     /// <summary>
-    /// Represents a single turn in the simulation
+    /// Immutable record of a single spin execution containing credit state,
+    /// bet amount, win outcome, and prize details. Forms the atomic unit
+    /// of simulation history for detailed analysis.
     /// </summary>
     [Serializable]
     public class SimulationTurnResult

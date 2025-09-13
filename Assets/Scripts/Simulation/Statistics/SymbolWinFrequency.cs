@@ -1,9 +1,11 @@
 using System;
 
-namespace SweetSpin
+namespace SweetSpin.Simulation.Statistics
 {
     /// <summary>
-    /// Tracks how often each symbol produces wins
+    /// Performance metrics for individual symbol types tracking win contribution,
+    /// average payouts, and relative frequency. Critical for symbol balance analysis
+    /// and RTP contribution assessment.
     /// </summary>
     [Serializable]
     public class SymbolWinFrequency

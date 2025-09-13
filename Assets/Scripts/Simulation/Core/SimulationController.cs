@@ -1,16 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using SweetSpin.Core;
+using SweetSpin.Simulation.Data;
+using SweetSpin.Simulation.Statistics;
 
-namespace SweetSpin.Simulation
+namespace SweetSpin.Simulation.Core
 {
     /// <summary>
-    /// Handles the core simulation logic without any UI dependencies
+    /// Core simulation engine that executes headless game sessions using production
+    /// game logic. Manages service initialization, spin execution, statistics collection,
+    /// and report generation without UI dependencies for maximum performance.
     /// </summary>
     public class SimulationController
     {
+        private const int TOP_LINES_COUNT = 5;
+
         private SlotMachineConfiguration configuration;
         private IRandomService randomService;
         private ISymbolService symbolService;
@@ -181,7 +186,7 @@ namespace SweetSpin.Simulation
                 totalLines = configuration.paylineCount,
                 totalBet = totalBet,
                 totalWon = totalWon,
-                rtp = totalBet > 0 ? (totalWon / (float)totalBet) * 100f : 0f,
+                rtp = totalBet > 0 ? totalWon / (float)totalBet * 100f : 0f,
                 turns = turnResults.ToArray()
             };
 
@@ -203,7 +208,7 @@ namespace SweetSpin.Simulation
             var winningTurns = turnResults.Where(t => t.isWin).ToList();
             stats.totalWins = winningTurns.Count;
             stats.totalLosses = turnResults.Count - stats.totalWins;
-            stats.hitFrequency = turnResults.Count > 0 ? (stats.totalWins / (float)turnResults.Count) * 100f : 0f;
+            stats.hitFrequency = turnResults.Count > 0 ? stats.totalWins / (float)turnResults.Count * 100f : 0f;
             stats.averageWinAmount = stats.totalWins > 0 ? (float)winningTurns.Average(t => t.prizeAmount) : 0f;
             stats.biggestWin = biggestWin;
             stats.biggestWinTurn = biggestWinTurn;
@@ -211,13 +216,13 @@ namespace SweetSpin.Simulation
             // Calculate most common winning lines (top 5)
             var topLines = lineHitCounts
                 .OrderByDescending(kvp => kvp.Value)
-                .Take(5)
+                .Take(TOP_LINES_COUNT)
                 .Select(kvp => new LineFrequency
                 {
                     lineIndex = kvp.Key,
                     lineName = $"Line {kvp.Key + 1}",
                     hitCount = kvp.Value,
-                    hitPercentage = stats.totalWins > 0 ? (kvp.Value / (float)stats.totalWins) * 100f : 0f
+                    hitPercentage = stats.totalWins > 0 ? kvp.Value / (float)stats.totalWins * 100f : 0f
                 })
                 .ToArray();
             stats.mostCommonWinningLines = topLines;
@@ -233,7 +238,7 @@ namespace SweetSpin.Simulation
                     {
                         symbolType = kvp.Key.ToString(),
                         winCount = kvp.Value.winCount,
-                        winPercentage = stats.totalWins > 0 ? (kvp.Value.winCount / (float)stats.totalWins) * 100f : 0f,
+                        winPercentage = stats.totalWins > 0 ? kvp.Value.winCount / (float)stats.totalWins * 100f : 0f,
                         totalPrizeAmount = kvp.Value.totalPrize,
                         averagePrize = kvp.Value.winCount > 0 ? kvp.Value.totalPrize / (float)kvp.Value.winCount : 0f
                     });

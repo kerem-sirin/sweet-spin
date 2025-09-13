@@ -1,9 +1,11 @@
 using System;
 
-namespace SweetSpin.Simulation
+namespace SweetSpin.Simulation.Data
 {
     /// <summary>
-    /// Complete simulation report with statistics
+    /// Main container for complete simulation results including configuration metadata,
+    /// financial summary, detailed statistics, and individual turn history.
+    /// Serializable for JSON export and analysis.
     /// </summary>
     [Serializable]
     public class SimulationReport

@@ -1,9 +1,10 @@
 using System;
 
-namespace SweetSpin.Simulation
+namespace SweetSpin.Simulation.Statistics
 {
     /// <summary>
-    /// Tracks how often each line wins
+    /// Statistical tracker for individual payline performance measuring hit count
+    /// and relative frequency. Used to identify payline balance and pattern biases.
     /// </summary>
     [Serializable]
     public class LineFrequency
