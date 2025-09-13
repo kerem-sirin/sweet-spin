@@ -72,7 +72,7 @@ namespace SweetSpin.Simulation.Core
         /// <summary>
         /// Run a complete simulation
         /// </summary>
-        public SimulationReport RunSimulation(int startingCredits, int betPerLine, int maxTurns)
+        public SimulationReport RunSimulation(int startingCredits, int betPerLine, int maxTurns, bool saveTurnDetails = true)
         {
             // Reset tracking
             InitializeTracking();
@@ -125,7 +125,7 @@ namespace SweetSpin.Simulation.Core
                     biggestWinTurn = currentTurn;
                 }
 
-                // Record turn result
+                // In the loop where we create turnResult:
                 var turnResult = new SimulationTurnResult
                 {
                     turn = currentTurn,
@@ -138,6 +138,7 @@ namespace SweetSpin.Simulation.Core
                     matchCount = wins.Count > 0 ? wins[0].matchCount : 0
                 };
 
+                // Always add to turnResults for statistics calculation
                 turnResults.Add(turnResult);
 
                 // Track line and symbol statistics
@@ -156,14 +157,15 @@ namespace SweetSpin.Simulation.Core
                 currentTurn++;
             }
 
-            // Generate report
+            // Generate report with conditional turn details
             return GenerateReport(
                 startingCredits,
                 betPerLine,
                 totalBet,
                 totalWon,
                 biggestWin,
-                biggestWinTurn
+                biggestWinTurn,
+                saveTurnDetails  // Pass the flag
             );
         }
 
@@ -173,7 +175,8 @@ namespace SweetSpin.Simulation.Core
             int totalBet,
             int totalWon,
             int biggestWin,
-            int biggestWinTurn)
+            int biggestWinTurn,
+            bool saveTurnDetails)
         {
             var report = new SimulationReport
             {
@@ -187,7 +190,7 @@ namespace SweetSpin.Simulation.Core
                 totalBet = totalBet,
                 totalWon = totalWon,
                 rtp = totalBet > 0 ? totalWon / (float)totalBet * 100f : 0f,
-                turns = turnResults.ToArray()
+                turns = saveTurnDetails ? turnResults.ToArray() : new SimulationTurnResult[0]
             };
 
             // Generate statistics

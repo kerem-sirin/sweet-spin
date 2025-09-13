@@ -305,5 +305,34 @@ namespace SweetSpin.Core
                 saveService.SaveCredits(gameModel.Credits);
             }
         }
+
+        [ContextMenu("Debug/Add 100 Credits")]
+        private void Add100Credits() => AddDebugCredits(100);
+
+        [ContextMenu("Debug/Add 1000 Credits")]
+        private void Add1000Credits() => AddDebugCredits(1000);
+
+        [ContextMenu("Debug/Reset to Starting Credits")]
+        private void ResetCredits()
+        {
+            if (gameModel != null && configuration != null)
+            {
+                gameModel.SetCredits(configuration.startingCredits);
+                saveService?.SaveCredits(gameModel.Credits);
+                UpdateUI();
+                Debug.Log("Reset to starting credits: " + configuration.startingCredits);
+            }
+        }
+
+        private void AddDebugCredits(int amount)
+        {
+            if (gameModel != null)
+            {
+                gameModel.AddCredits(amount);
+                saveService?.SaveCredits(gameModel.Credits);
+                UpdateUI();
+                Debug.Log($"Added {amount} credits. New balance: {gameModel.Credits}");
+            }
+        }
     }
 }
