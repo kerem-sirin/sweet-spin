@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -122,13 +121,19 @@ namespace SweetSpin.Core
         public void UpdateUI(int credits, int bet, int lines)
         {
             if (creditsText != null)
-                creditsText.text = $"Credits: {credits}";
+            {
+                creditsText.text = credits.ToString();
+            }
 
             if (betText != null)
-                betText.text = $"Bet: {bet}";
+            {
+                betText.text = bet.ToString();
+            }
 
             if (linesText != null)
-                linesText.text = $"Lines: {lines}";
+            {
+                linesText.text = lines.ToString();
+            }
         }
 
         /// <summary>
@@ -212,7 +217,9 @@ namespace SweetSpin.Core
                 .SetEase(Ease.OutBounce);
 
             if (winParticles != null)
+            {
                 winParticles.Play();
+            }
         }
 
         private void AnimateJackpot()
@@ -222,7 +229,9 @@ namespace SweetSpin.Core
                 .SetEase(Ease.OutElastic);
 
             if (winParticles != null)
+            {
                 winParticles.Play();
+            }
 
             // Could add screen shake or other dramatic effects
         }
@@ -231,16 +240,22 @@ namespace SweetSpin.Core
         private void OnSpinStarted(SpinStartedEvent e)
         {
             if (spinButton != null)
+            {
                 spinButton.interactable = false;
+            }
 
             if (winText != null)
+            {
                 winText.text = "Spinning...";
+            }
         }
 
         private void OnSpinCompleted(SpinCompletedEvent e)
         {
             if (spinButton != null)
+            {
                 spinButton.interactable = true;
+            }
         }
 
         private void OnCreditsChanged(CreditsChangedEvent e)
@@ -249,7 +264,7 @@ namespace SweetSpin.Core
             if (creditsText != null)
             {
                 // Simple update for now
-                creditsText.text = $"Credits: {e.NewCredits}";
+                creditsText.text = e.NewCredits.ToString();
             }
         }
 
