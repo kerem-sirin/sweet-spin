@@ -963,7 +963,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -20.02, y: -0.0000047684}
+  m_AnchoredPosition: {x: -20, y: 0}
   m_SizeDelta: {x: 37.234, y: 37.234}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5130722658236037709
@@ -1051,6 +1051,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1993873737145322059}
+  - component: {fileID: 616012861702870453}
   - component: {fileID: 6352719727013252856}
   m_Layer: 5
   m_Name: FastSpinToggle
@@ -1079,6 +1080,27 @@ RectTransform:
   m_AnchoredPosition: {x: 167, y: -238}
   m_SizeDelta: {x: 90, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &616012861702870453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3719920010289611664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b17887f83b4b0b6498cff7812f97919a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  turboToggle: {fileID: 6352719727013252856}
+  turboIcon: {fileID: 2022516222111112223}
+  checkmarkBackgroundIcon: {fileID: 5951167895033782353}
+  checkmarkTransform: {fileID: 1109832352260606669}
+  turboInactiveIconColor: {r: 0.5411765, g: 0.5411765, b: 0.5411765, a: 1}
+  turboActiveIconColor: {r: 1, g: 1, b: 1, a: 1}
+  turboInactiveBackgroundColor: {r: 0.5411765, g: 0.5411765, b: 0.5411765, a: 1}
+  turboActiveBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  toggleAnimationDuration: 0.2
 --- !u!114 &6352719727013252856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1104,7 +1126,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 1, g: 1, b: 1, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -1121,7 +1143,7 @@ MonoBehaviour:
   m_Interactable: 1
   m_TargetGraphic: {fileID: 3998956078662141595}
   toggleTransition: 1
-  graphic: {fileID: 6142661977361173069}
+  graphic: {fileID: 0}
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:

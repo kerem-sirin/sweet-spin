@@ -119,7 +119,7 @@ namespace SweetSpin.Core
         /// <summary>
         /// Start spinning reels with the given results
         /// </summary>
-        public void SpinReels(SymbolType[,] results)
+        public void SpinReels(SymbolType[,] results, float spinSpeed, float spinDuration, float reelStopDelay)
         {
             for (int i = 0; i < reel.Length; i++)
             {
@@ -129,8 +129,9 @@ namespace SweetSpin.Core
                     reelSymbols[j] = results[i, j];
                 }
 
-                float delay = i * configuration.reelStopDelay;
-                reel[i].Spin(reelSymbols, delay);
+                float delay = i * reelStopDelay;
+                // Pass the timing parameters to each reel
+                reel[i].Spin(reelSymbols, spinSpeed, spinDuration, delay);
             }
         }
 

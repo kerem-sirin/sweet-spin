@@ -28,12 +28,39 @@ namespace SweetSpin.Core
         private SlotMachineView slotMachineView;
         private GameStateMachine stateMachine;
 
+        private bool isTurboMode = false;
+
         private void Start()
         {
             InitializeServices();
             InitializeGame();
             CreateView();
             SetupUI();
+        }
+
+        private void OnDestroy()
+        {
+            // Unsubscribe from events
+            if (eventBus != null)
+            {
+                eventBus.Unsubscribe<SpinStartedEvent>(OnSpinStarted);
+                eventBus.Unsubscribe<SpinCompletedEvent>(OnSpinCompleted);
+                eventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
+                eventBus.Unsubscribe<ReelStoppedEvent>(OnReelStopped);
+                eventBus?.Unsubscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
+                eventBus.Unsubscribe<TurboModeChangedEvent>(OnTurboModeChanged);
+            }
+
+            // Save game state
+            if (saveService != null && gameModel != null)
+            {
+                saveService.SaveCredits(gameModel.Credits);
+            }
+        }
+
+        private void OnTurboModeChanged(TurboModeChangedEvent e)
+        {
+            isTurboMode = e.IsEnabled;
         }
 
         private void InitializeServices()
@@ -120,6 +147,7 @@ namespace SweetSpin.Core
             eventBus.Subscribe<CreditsChangedEvent>(OnCreditsChanged);
             eventBus.Subscribe<ReelStoppedEvent>(OnReelStopped);
             eventBus.Subscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
+            eventBus.Subscribe<TurboModeChangedEvent>(OnTurboModeChanged);
         }
 
         private void OnSpinButtonClick()
@@ -142,10 +170,10 @@ namespace SweetSpin.Core
                 return;
             }
 
-            StartCoroutine(ExecuteSpin());
+            StartCoroutine(ExecuteSpin(isTurboMode));
         }
 
-        private IEnumerator ExecuteSpin()
+        private IEnumerator ExecuteSpin(bool isTurboMode = false)
         {
             // Change state
             stateMachine.TransitionTo(GameState.Spinning);
@@ -156,12 +184,16 @@ namespace SweetSpin.Core
             // Publish spin started event
             eventBus.Publish(new SpinStartedEvent(gameModel.CurrentBet));
 
-            // Tell the view to spin the reels
-            slotMachineView.SpinReels(spinResult.Grid);
+            // Calculate timing based on turbo mode
+            float spinDuration = isTurboMode ? configuration.turboSpinDuration : configuration.spinDuration;
+            float reelStopDelay = isTurboMode ? configuration.turboReelStopDelay : configuration.reelStopDelay;
+            float spinSpeed = isTurboMode ? configuration.turboSpinSpeed : configuration.spinSpeed;
 
-            // Wait for all reels to stop
-            yield return new WaitForSeconds(configuration.spinDuration +
-                (configuration.reelCount * configuration.reelStopDelay));
+            // Tell the view to spin the reels with appropriate speed
+            slotMachineView.SpinReels(spinResult.Grid, spinSpeed, spinDuration, reelStopDelay);
+
+            // Wait for all reels to stop (adjusted for turbo mode)
+            yield return new WaitForSeconds(spinDuration + (configuration.reelCount * reelStopDelay));
 
             // Transition to evaluation
             stateMachine.TransitionTo(GameState.Evaluating);
@@ -187,13 +219,15 @@ namespace SweetSpin.Core
 
             // Show results
             stateMachine.TransitionTo(GameState.ShowingWin);
-            yield return ShowWinPresentation(spinResult);
+
+            // Pass turbo mode to win presentation for faster animations
+            yield return ShowWinPresentation(spinResult, isTurboMode);
 
             // Return to idle
             stateMachine.TransitionTo(GameState.Idle);
         }
 
-        private IEnumerator ShowWinPresentation(SpinResult result)
+        private IEnumerator ShowWinPresentation(SpinResult result, bool isTurboMode = false)
         {
             if (result.IsWin)
             {
@@ -212,12 +246,17 @@ namespace SweetSpin.Core
                     slotMachineView.AnimateWinningLine(win);
                 }
 
-                yield return new WaitForSeconds(2f);
+                // Shorter display time in turbo mode
+                float displayTime = isTurboMode ? 0.5f : 2f;
+                yield return new WaitForSeconds(displayTime);
             }
             else
             {
                 slotMachineView.ShowWinMessage("Try Again!", WinTier.None);
-                yield return new WaitForSeconds(0.5f);
+
+                // Shorter delay in turbo mode
+                float displayTime = isTurboMode ? 0.2f : 0.5f;
+                yield return new WaitForSeconds(displayTime);
             }
         }
 
@@ -307,25 +346,6 @@ namespace SweetSpin.Core
                     gameModel.Credits,
                     gameModel.CurrentBet
                 );
-            }
-        }
-
-        private void OnDestroy()
-        {
-            // Unsubscribe from events
-            if (eventBus != null)
-            {
-                eventBus.Unsubscribe<SpinStartedEvent>(OnSpinStarted);
-                eventBus.Unsubscribe<SpinCompletedEvent>(OnSpinCompleted);
-                eventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
-                eventBus.Unsubscribe<ReelStoppedEvent>(OnReelStopped);
-                eventBus?.Unsubscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
-            }
-
-            // Save game state
-            if (saveService != null && gameModel != null)
-            {
-                saveService.SaveCredits(gameModel.Credits);
             }
         }
 
