@@ -25,6 +25,7 @@ namespace SweetSpin.Core
 
         [Header("Additional UI")]
         [SerializeField] private PaytableDisplay paytableDisplay;
+        [SerializeField] private CreditPurchasePanel creditPurchasePanel;
 
         [Header("Visual Effects")]
         [SerializeField] private ParticleSystem winParticles;
@@ -103,6 +104,16 @@ namespace SweetSpin.Core
                 eventBus.Subscribe<SpinCompletedEvent>(OnSpinCompleted);
                 eventBus.Subscribe<CreditsChangedEvent>(OnCreditsChanged);
             }
+
+            eventBus.Subscribe<InsufficientCreditsEvent>(OnInsufficientCredits);
+        }
+
+        private void OnInsufficientCredits(InsufficientCreditsEvent e)
+        {
+            if (creditPurchasePanel != null)
+            {
+                creditPurchasePanel.Show();
+            }
         }
 
         /// <summary>
@@ -161,6 +172,8 @@ namespace SweetSpin.Core
                     winText.color = new Color(0f, 1f, 1f); // Cyan
                     break;
                 case WinTier.Small:
+                    winText.color = Color.white;
+                    break;
                 case WinTier.Medium:
                     winText.color = new Color(0f, 1f, 0f); // Green
                     break;
