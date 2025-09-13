@@ -282,8 +282,7 @@ namespace SweetSpin.Core
             {
                 slotMachineView.UpdateUI(
                     gameModel.Credits,
-                    gameModel.CurrentBet,
-                    configuration.paylineCount
+                    gameModel.CurrentBet
                 );
             }
         }

@@ -23,7 +23,6 @@ namespace SweetSpin.Core
         [SerializeField] private TextMeshProUGUI creditsText;
         [SerializeField] private TextMeshProUGUI betText;
         [SerializeField] private TextMeshProUGUI winText;
-        [SerializeField] private TextMeshProUGUI linesText;
 
         [Header("Visual Effects")]
         [SerializeField] private ParticleSystem winParticles;
@@ -118,7 +117,7 @@ namespace SweetSpin.Core
         /// <summary>
         /// Update UI text displays
         /// </summary>
-        public void UpdateUI(int credits, int bet, int lines)
+        public void UpdateUI(int credits, int bet)
         {
             if (creditsText != null)
             {
@@ -128,11 +127,6 @@ namespace SweetSpin.Core
             if (betText != null)
             {
                 betText.text = bet.ToString();
-            }
-
-            if (linesText != null)
-            {
-                linesText.text = lines.ToString();
             }
         }
 
