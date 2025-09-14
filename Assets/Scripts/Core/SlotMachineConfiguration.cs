@@ -19,6 +19,7 @@ namespace SweetSpin.Core
         public float spinDuration = 2f;
         public float reelStopDelay = 0.3f;
         public float snapDuration = 0.3f;
+        public float autoPlayDelay = 1f;
 
         [Header("Turbo Mode Settings")]
         public bool turboModeEnabled = false;
@@ -27,6 +28,7 @@ namespace SweetSpin.Core
         public float turboReelStopDelay = 0.05f;  // Almost instant
         public float turboWinDisplayTime = 0.5f;  // Shorter win display
         public float turboSnapDuration = 0.1f;
+        public float autoPlayDelayTurbo = 0.5f;
 
         [Header("Symbols")]
         public SymbolData[] symbolDatabase;

@@ -10,8 +10,9 @@ namespace SweetSpin
         Spinning = 1 << 0,
         Evaluating = 1 << 1,
         ShowingWin = 1 << 2,
-        Bonus = 1 << 3,
-        GameOver = 1 << 4,
-        AllExceptIdle = Spinning | Evaluating | ShowingWin | Bonus | GameOver
+        AutoPlayWaiting = 1 << 3,
+        Bonus = 1 << 4,
+        GameOver = 1 << 5,
+        AllExceptIdle = Spinning | Evaluating | ShowingWin | AutoPlayWaiting | Bonus | GameOver
     }
 }

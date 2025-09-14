@@ -22,11 +22,13 @@ namespace SweetSpin.Core
         private IRandomService randomService;
         private IPaylineService paylineService;
         private ISymbolService symbolService;
+        private IAutoPlayService autoPlayService;
 
         // Game components
         private SlotMachineModel gameModel;
         private SlotMachineView slotMachineView;
         private GameStateMachine stateMachine;
+        private AutoPlayService autoPlayManager;
 
         private bool isTurboMode = false;
 
@@ -47,8 +49,9 @@ namespace SweetSpin.Core
                 eventBus.Unsubscribe<SpinCompletedEvent>(OnSpinCompleted);
                 eventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
                 eventBus.Unsubscribe<ReelStoppedEvent>(OnReelStopped);
-                eventBus?.Unsubscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
+                eventBus.Unsubscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
                 eventBus.Unsubscribe<TurboModeChangedEvent>(OnTurboModeChanged);
+                eventBus.Unsubscribe<AutoPlayStartedEvent>(OnAutoPlayStarted);
             }
 
             // Save game state
@@ -72,10 +75,12 @@ namespace SweetSpin.Core
             randomService = ServiceLocator.Instance.Get<IRandomService>();
             paylineService = ServiceLocator.Instance.Get<IPaylineService>();
             symbolService = ServiceLocator.Instance.Get<ISymbolService>();
+            autoPlayService = ServiceLocator.Instance.Get<IAutoPlayService>();
 
             // Initialize services with configuration
             symbolService.Initialize(configuration.symbolDatabase);
             paylineService.Initialize(configuration.paylinePatterns);
+            autoPlayService.Initialize(eventBus);
 
             // Initialize PaylineService properly
             var paylineServiceImpl = ServiceLocator.Instance.Get<IPaylineService>() as PaylineService;
@@ -148,6 +153,7 @@ namespace SweetSpin.Core
             eventBus.Subscribe<ReelStoppedEvent>(OnReelStopped);
             eventBus.Subscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
             eventBus.Subscribe<TurboModeChangedEvent>(OnTurboModeChanged);
+            eventBus.Subscribe<AutoPlayStartedEvent>(OnAutoPlayStarted);
         }
 
         private void OnSpinButtonClick()
@@ -346,6 +352,45 @@ namespace SweetSpin.Core
                     gameModel.Credits,
                     gameModel.CurrentBet
                 );
+            }
+        }
+
+        private void OnAutoPlayStarted(AutoPlayStartedEvent e)
+        {
+            // Start the auto-play coroutine
+            StartCoroutine(ExecuteAutoPlaySequence());
+        }
+
+        private IEnumerator ExecuteAutoPlaySequence()
+        {
+            while (autoPlayService.ShouldContinue())
+            {
+                // Check if we can afford to spin
+                if (!gameModel.CanSpin())
+                {
+                    autoPlayService.StopDueToInsufficientCredits();
+                    break;
+                }
+
+                // Execute single spin (this handles state transitions internally)
+                yield return ExecuteSpin(isTurboMode);
+
+                // Notify auto-play service that spin completed
+                autoPlayService.OnSpinCompleted();
+
+                // If more spins remain, add delay with proper state
+                if (autoPlayService.ShouldContinue())
+                {
+                    // Transition to waiting state to keep UI locked
+                    stateMachine.TransitionTo(GameState.AutoPlayWaiting);
+
+                    // Wait between spins
+                    float delay = isTurboMode ? configuration.autoPlayDelayTurbo : configuration.autoPlayDelay;
+                    yield return new WaitForSeconds(delay);
+
+                    // Return to idle before next spin
+                    stateMachine.TransitionTo(GameState.Idle);
+                }
             }
         }
 

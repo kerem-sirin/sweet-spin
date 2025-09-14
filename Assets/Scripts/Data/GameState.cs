@@ -14,6 +14,8 @@ namespace SweetSpin
         Evaluating,
         /// <summary>Displaying win animations and results</summary>
         ShowingWin,
+        /// <summary>Auto-play is active and waiting for next spin</summary>
+        AutoPlayWaiting,
         /// <summary>Bonus game or free spins active</summary>
         Bonus,
         /// <summary>No credits remaining</summary>

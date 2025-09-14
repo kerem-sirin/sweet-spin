@@ -45,7 +45,7 @@ namespace SweetSpin
             switch (state)
             {
                 case GameState.Idle:
-                    return false; // Never locked during idle
+                    return false;
 
                 case GameState.Spinning:
                     return (lockDuringStates & LockDuringStates.Spinning) != 0;
@@ -56,6 +56,9 @@ namespace SweetSpin
                 case GameState.ShowingWin:
                     return (lockDuringStates & LockDuringStates.ShowingWin) != 0;
 
+                case GameState.AutoPlayWaiting:
+                    return (lockDuringStates & LockDuringStates.AutoPlayWaiting) != 0;
+
                 case GameState.Bonus:
                     return (lockDuringStates & LockDuringStates.Bonus) != 0;
 
@@ -63,7 +66,7 @@ namespace SweetSpin
                     return (lockDuringStates & LockDuringStates.GameOver) != 0;
 
                 default:
-                    return true; // Lock by default for unknown states
+                    return true;
             }
         }
 

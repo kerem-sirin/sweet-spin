@@ -74,7 +74,7 @@ namespace SweetSpin
             isInitialized = true;
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             if (turboToggle != null)
             {
@@ -85,6 +85,8 @@ namespace SweetSpin
             {
                 eventBus.Unsubscribe<TurboModeChangedEvent>(OnTurboModeChanged);
             }
+
+            base.OnDestroy();
         }
 
         private void Update()
