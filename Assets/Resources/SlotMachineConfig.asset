@@ -18,6 +18,15 @@ MonoBehaviour:
   spinSpeed: 1600
   spinDuration: 2
   reelStopDelay: 0.3
+  snapDuration: 0.3
+  autoPlayDelay: 1
+  turboModeEnabled: 0
+  turboSpinSpeed: 3200
+  turboSpinDuration: 0.5
+  turboReelStopDelay: 0.05
+  turboWinDisplayTime: 0.5
+  turboSnapDuration: 0.1
+  autoPlayDelayTurbo: 0.5
   symbolDatabase:
   - type: 0
     sprite: {fileID: -3657720759404234663, guid: e293d7630ca016b439b384d84ed98ca6, type: 3}
