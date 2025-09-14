@@ -9,7 +9,7 @@ namespace SweetSpin
     /// Handles the turbo mode toggle UI element and publishes state changes
     /// through the event bus for complete decoupling from game logic.
     /// </summary>
-    public class TurboModeToggleHandler : MonoBehaviour
+    public class TurboModeToggleHandler : UILockableComponent
     {
         [Header("UI References")]
         [SerializeField] private Toggle turboToggle;
@@ -24,11 +24,20 @@ namespace SweetSpin
         [SerializeField] private Color turboActiveBackgroundColor;
         [SerializeField] private float toggleAnimationDuration = 0.2f;
 
-        private IEventBus eventBus;
         private bool isInitialized = false;
 
-        private void Start()
+        protected override void SetLocked(bool locked)
         {
+            if (turboToggle != null)
+            {
+                turboToggle.interactable = !locked;
+            }
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+
             // Get event bus from service locator
             eventBus = ServiceLocator.Instance.Get<IEventBus>();
 

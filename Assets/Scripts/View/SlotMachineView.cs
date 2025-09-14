@@ -63,6 +63,16 @@ namespace SweetSpin.Core
             winText.text = "";
         }
 
+        private void OnDestroy()
+        {
+            // Unsubscribe from events
+            if (eventBus != null)
+            {
+                eventBus.Unsubscribe<SpinStartedEvent>(OnSpinStarted);
+                eventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
+            }
+        }
+
         private void CreateReels()
         {
             if (reelContainer == null)
@@ -109,7 +119,6 @@ namespace SweetSpin.Core
             if (eventBus != null)
             {
                 eventBus.Subscribe<SpinStartedEvent>(OnSpinStarted);
-                eventBus.Subscribe<SpinCompletedEvent>(OnSpinCompleted);
                 eventBus.Subscribe<CreditsChangedEvent>(OnCreditsChanged);
             }
 
@@ -212,23 +221,10 @@ namespace SweetSpin.Core
         // Event handlers
         private void OnSpinStarted(SpinStartedEvent e)
         {
-            if (spinButton != null)
-            {
-                spinButton.interactable = false;
-            }
-
             if (winText != null)
             {
                 winText.text = "Spinning...";
                 winText.color = Color.white;
-            }
-        }
-
-        private void OnSpinCompleted(SpinCompletedEvent e)
-        {
-            if (spinButton != null)
-            {
-                spinButton.interactable = true;
             }
         }
 
@@ -239,17 +235,6 @@ namespace SweetSpin.Core
             {
                 // Simple update for now
                 creditsText.text = e.NewCredits.ToString();
-            }
-        }
-
-        private void OnDestroy()
-        {
-            // Unsubscribe from events
-            if (eventBus != null)
-            {
-                eventBus.Unsubscribe<SpinStartedEvent>(OnSpinStarted);
-                eventBus.Unsubscribe<SpinCompletedEvent>(OnSpinCompleted);
-                eventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
             }
         }
     }
