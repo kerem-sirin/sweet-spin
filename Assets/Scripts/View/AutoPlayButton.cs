@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using SweetSpin.Core;
+using DG.Tweening;
 
 namespace SweetSpin
 {
@@ -52,7 +53,6 @@ namespace SweetSpin
             // Subscribe to auto-play events
             eventBus?.Subscribe<AutoPlayStartedEvent>(OnAutoPlayStarted);
             eventBus?.Subscribe<AutoPlayStoppedEvent>(OnAutoPlayStopped);
-            eventBus?.Subscribe<SpinCompletedEvent>(OnSpinCompleted);
             eventBus?.Subscribe<AutoPlayRemainingChangedEvent>(OnRemainingChanged);
 
             // Initialize display
@@ -66,7 +66,6 @@ namespace SweetSpin
             button?.onClick.RemoveListener(OnButtonClick);
             eventBus?.Unsubscribe<AutoPlayStartedEvent>(OnAutoPlayStarted);
             eventBus?.Unsubscribe<AutoPlayStoppedEvent>(OnAutoPlayStopped);
-            eventBus?.Unsubscribe<SpinCompletedEvent>(OnSpinCompleted);
             eventBus?.Unsubscribe<AutoPlayRemainingChangedEvent>(OnRemainingChanged);
         }
 
@@ -96,21 +95,12 @@ namespace SweetSpin
             UpdateButtonDisplay();
         }
 
-        private void OnSpinCompleted(SpinCompletedEvent e)
-        {
-            // Update remaining count display
-            if (isInAutoPlayMode && autoPlayService != null)
-            {
-                UpdateRemainingDisplay();
-            }
-        }
-
 
         private void OnRemainingChanged(AutoPlayRemainingChangedEvent e)
         {
-            if (isInAutoPlayMode)
+            if (isInAutoPlayMode && e.RemainingSpins != 0)
             {
-                UpdateRemainingDisplay();
+                UpdateRemainingDisplay(false);
             }
         }
 
@@ -124,19 +114,56 @@ namespace SweetSpin
             // Show/hide remaining text
             if (remainingGameObject != null)
             {
-                remainingGameObject.gameObject.SetActive(isInAutoPlayMode);
-                if (isInAutoPlayMode)
+                // show/hide with tween
+                if(isInAutoPlayMode)
                 {
-                    UpdateRemainingDisplay();
+                    // Animate in
+                    remainingGameObject.transform
+                        .DOScale(Vector3.one, 0.5f)
+                        .OnStart(() =>
+                        {
+                            remainingGameObject.transform.localScale = Vector3.zero;
+                            UpdateRemainingDisplay(true);
+                            remainingGameObject.SetActive(true);
+                        })
+                        .SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    // Animate out
+                    remainingGameObject.transform
+                    .DOScale(Vector3.zero, 0.5f)
+                    .OnComplete(() =>
+                    {
+                        remainingGameObject.transform.localScale = Vector3.zero;
+                        remainingGameObject.SetActive(false);
+                    })
+                    .SetEase(Ease.OutBack);
                 }
             }
         }
 
-        private void UpdateRemainingDisplay()
+        private void UpdateRemainingDisplay(bool isInstant)
         {
-            if (autoPlayService != null)
+            if (autoPlayService != null && isInstant)
             {
                 remainingText.text = autoPlayService.RemainingSpins.ToString();
+            }
+            else
+            {
+                // Animate the remainingGameObject (increase scale a bit and go back to normal)
+                remainingGameObject.transform
+                    .DOScale(1.2f, 0.2f)
+                    .OnStart(() =>
+                    {
+                        remainingText.text = autoPlayService.RemainingSpins.ToString();
+                    })
+                    .OnComplete(() =>
+                    {
+                        remainingGameObject.transform
+                            .DOScale(Vector3.one, 0.2f);
+                    })
+                    .SetEase(Ease.OutBack);
             }
         }
 
