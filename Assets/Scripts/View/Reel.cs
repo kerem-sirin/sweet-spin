@@ -44,6 +44,10 @@ namespace SweetSpin
         public int ReelIndex => reelIndex;
         public float SymbolHeight => symbolHeight;
 
+        private float defaultSnapDuration;
+        private float turboSnapDuration;
+        private bool isInTurboMode = false;
+
         private void Awake()
         {
             if (symbolContainer == null)
@@ -86,7 +90,8 @@ namespace SweetSpin
             }
         }
 
-        public void Initialize(int index, SymbolData[] symbolData, float spinSpeed, float spinDuration, float stopDelay)
+        public void Initialize(int index, SymbolData[] symbolData, float spinSpeed, float spinDuration,
+                              float stopDelay, float snapDuration, float turboSnapDur)
         {
             reelIndex = index;
             availableSymbols = symbolData;
@@ -99,6 +104,10 @@ namespace SweetSpin
             // Set current values to defaults initially
             currentSpinSpeed = spinSpeed;
             currentSpinDuration = spinDuration;
+
+            // Store snap durations
+            defaultSnapDuration = snapDuration;  
+            turboSnapDuration = turboSnapDur;
 
             CreateSymbols();
             SetRandomSymbols();
@@ -184,6 +193,8 @@ namespace SweetSpin
 
             // Stop and snap to result
             spinSequence.AppendCallback(() => StopSpinning());
+
+            isInTurboMode = speed > defaultSpinSpeed;
         }
 
         private void StartSpinning()
@@ -251,8 +262,7 @@ namespace SweetSpin
 
         private void SnapToGrid()
         {
-            // Also make snap duration responsive to turbo mode
-            float snapDuration = currentSpinSpeed > defaultSpinSpeed ? 0.1f : 0.3f;
+            float snapDuration = isInTurboMode ? turboSnapDuration : defaultSnapDuration;
 
             for (int i = 0; i < symbols.Count; i++)
             {
