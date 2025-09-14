@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 3ab54dd9c09b0584482d59f0c1e94462
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274456
+  packageName: uGUI Particles - UI Particles Image for Canvas
+  packageVersion: 1.2.3
+  assetPath: Assets/Kamgam/UGUIParticles/Scripts/EditorScripts/ShowIfAttribute.cs
+  uploadId: 712907

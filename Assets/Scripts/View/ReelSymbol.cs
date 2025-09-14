@@ -1,4 +1,5 @@
 using DG.Tweening;
+using SweetSpin.VFX;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +17,7 @@ namespace SweetSpin
 
         [Header("Win Animation Settings")]
         [SerializeField] private float winScaleAmount = 1.3f;
+        [SerializeField] private Transform particleSystemTransform;
 
         private SymbolType symbolType;
         private RectTransform rectTransform;
@@ -86,6 +88,20 @@ namespace SweetSpin
                     winFrame.gameObject.SetActive(true);
                 }
             });
+
+            // Extremely hacky way to ensure particles render above UI not to tackle horizontal/vertical layout group sorting issues.
+            // Will revisit later with a more robust solution.
+            Transform vfxTransform = Instantiate(particleSystemTransform, transform.parent.parent.parent.parent.parent);
+            vfxTransform.position = transform.position;
+            WinParticleController vfxController = vfxTransform.GetComponent<WinParticleController>();
+            if (vfxController != null)
+            {
+                vfxController.Initialize(frameColor);
+            }
+            else
+            {
+                Debug.LogWarning("ReelSymbol: WinParticleController component missing on particleSystemTransform prefab.");
+            }
 
             // Animate scale up and frame fade in simultaneously (30% of duration)
             currentWinSequence.Append(

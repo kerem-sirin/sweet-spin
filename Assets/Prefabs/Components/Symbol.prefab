@@ -129,6 +129,7 @@ MonoBehaviour:
   symbolImage: {fileID: 8433367108459325617}
   winFrame: {fileID: 4862667927582840297}
   winScaleAmount: 1.3
+  particleSystemTransform: {fileID: 6982592270098364407, guid: 9c9dcd367aea20d4dbd722997325701c, type: 3}
 --- !u!222 &3039879303952673110
 CanvasRenderer:
   m_ObjectHideFlags: 0

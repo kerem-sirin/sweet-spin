@@ -672,24 +672,24 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 0
   scriptingDefineSymbols:
-    Android: DOTWEEN
-    EmbeddedLinux: DOTWEEN
+    Android: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    EmbeddedLinux: DOTWEEN;KAMGAM_UGUI_PARTICLES
     GameCoreScarlett: DOTWEEN
-    GameCoreXboxOne: DOTWEEN
-    Kepler: DOTWEEN
-    LinuxHeadlessSimulation: DOTWEEN
-    Nintendo Switch: DOTWEEN
-    PS4: DOTWEEN
-    PS5: DOTWEEN
-    QNX: DOTWEEN
-    ReservedCFE: DOTWEEN
-    Standalone: DOTWEEN
-    VisionOS: DOTWEEN
-    WebGL: DOTWEEN
-    Windows Store Apps: DOTWEEN
-    XboxOne: DOTWEEN
-    iPhone: DOTWEEN
-    tvOS: DOTWEEN
+    GameCoreXboxOne: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    Kepler: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    LinuxHeadlessSimulation: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    Nintendo Switch: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    PS4: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    PS5: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    QNX: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    ReservedCFE: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    Standalone: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    VisionOS: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    WebGL: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    Windows Store Apps: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    XboxOne: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    iPhone: DOTWEEN;KAMGAM_UGUI_PARTICLES
+    tvOS: DOTWEEN;KAMGAM_UGUI_PARTICLES
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
