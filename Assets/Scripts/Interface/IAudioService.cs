@@ -8,6 +8,7 @@ namespace SweetSpin
     public interface IAudioService
     {
         // Core SFX
+        void PlaySFX(AudioClip clip, float volumeScale = 1f, float pitch = 1f);
         void PlaySpinSound();
         void StopSpinSound();
         void PlayReelStop(int reelIndex);
