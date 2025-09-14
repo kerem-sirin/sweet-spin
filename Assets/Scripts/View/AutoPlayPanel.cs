@@ -22,37 +22,52 @@ namespace SweetSpin
         [SerializeField] private float animationDuration = 0.3f;
 
         private IAutoPlayService autoPlayService;
-        private IEventBus eventBus;
+        private IAudioService audioService;
 
         private void Start()
         {
             autoPlayService = ServiceLocator.Instance.Get<IAutoPlayService>();
-            eventBus = ServiceLocator.Instance.Get<IEventBus>();
+            audioService = ServiceLocator.Instance.Get<IAudioService>();
 
             // Setup button listeners
             if (spin3Button != null)
             {
-                spin3Button.onClick.AddListener(() => SelectSpinCount(3));
+                spin3Button.onClick.AddListener(() => {
+                    audioService?.PlayButtonClick();
+                    SelectSpinCount(3);
+                });
             }
 
             if (spin7Button != null)
             {
-                spin7Button.onClick.AddListener(() => SelectSpinCount(7));
+                spin7Button.onClick.AddListener(() => {
+                    audioService?.PlayButtonClick();
+                    SelectSpinCount(7);
+                });
             }
 
             if (spin15Button != null)
             {
-                spin15Button.onClick.AddListener(() => SelectSpinCount(15));
+                spin15Button.onClick.AddListener(() => {
+                    audioService?.PlayButtonClick();
+                    SelectSpinCount(15);
+                });
             }
 
             if (closeButton != null)
             {
-                closeButton.onClick.AddListener(Hide);
+                closeButton.onClick.AddListener(() => {
+                    audioService?.PlayButtonClick();
+                    Hide();
+                });
             }
 
             if (backgroundAsButton != null)
             {
-                backgroundAsButton.onClick.AddListener(Hide);
+                backgroundAsButton.onClick.AddListener(() => {
+                    audioService?.PlayButtonClick();
+                    Hide();
+                });
             }
 
             // Hide panel initially

@@ -198,6 +198,73 @@ MonoBehaviour:
   m_FirstSelected: {fileID: 0}
   m_sendNavigationEvents: 1
   m_DragThreshold: 10
+--- !u!1 &208473569
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 208473570}
+  - component: {fileID: 208473571}
+  m_Layer: 0
+  m_Name: AudioService
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &208473570
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 208473569}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1872738078}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &208473571
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 208473569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d9250fe4ff661f4a8d867aa65ea193c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainMusic: {fileID: 8300000, guid: f9ecf8a8bd30c5d4bbca5682ff67c41e, type: 3}
+  musicDuckingLevel: 0.4
+  duckFadeTime: 0.5
+  buttonClickSound: {fileID: 8300000, guid: b4247070fba0d5543a3e8191fe838bdb, type: 3}
+  buttonHoverSound: {fileID: 8300000, guid: 1b20436bd38badf4684afe5f448b6988, type: 3}
+  reelStartSound: {fileID: 8300000, guid: 77f8fab7a28be2d4298cfab734fdfb1b, type: 3}
+  reelStopSound: {fileID: 8300000, guid: 9323f2baa5566964db2f96a724bb0db3, type: 3}
+  reelSpinLoopSound: {fileID: 8300000, guid: 0fd84489b0dafc54db23557994506a63, type: 3}
+  smallWinSound: {fileID: 8300000, guid: 84e280d6b49484247b9b43e20414732b, type: 3}
+  mediumWinSound: {fileID: 8300000, guid: 91d6e06cfc1302e448bc9e5b4e83279d, type: 3}
+  bigWinSound: {fileID: 8300000, guid: 9b74bdb9f193dc547be2eb0973b156bd, type: 3}
+  megaWinSound: {fileID: 8300000, guid: e0bbc19973e01a54d89050f604dfb918, type: 3}
+  jackpotWinSound: {fileID: 8300000, guid: 2c16051acf594084ab6f7a6f220b79db, type: 3}
+  payLineSound: {fileID: 8300000, guid: f2d15c547eacb1449857e7681edd046d, type: 3}
+  noWinSound: {fileID: 8300000, guid: 05e1c1c66d639a74cba2b034dbc42096, type: 3}
+  coinDropSound: {fileID: 8300000, guid: b4bf774211cddd046b7c96dd00e9731f, type: 3}
+  masterVolume: 1
+  musicVolume: 0.8
+  sfxVolume: 1
+  enableMusic: 1
+  enableSFX: 1
+  fadeInDuration: 1
+  fadeOutDuration: 0.5
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -455,7 +522,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 208473570}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807

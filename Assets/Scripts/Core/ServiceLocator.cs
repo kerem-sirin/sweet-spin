@@ -39,6 +39,22 @@ namespace SweetSpin.Core
             Register<IPaylineService>(new PaylineService());
             Register<ISymbolService>(new SymbolService());
             Register<IAutoPlayService>(new AutoPlayService());
+
+            RegisterAudioService();
+        }
+
+        private void RegisterAudioService()
+        {
+            // Check if AudioService already exists in scene
+            AudioService audioService = GetComponentInChildren<AudioService>();
+
+            if (audioService == null)
+            {
+                Debug.LogError("ServiceLocator: AudioService is missing!");
+                return;
+            }
+
+            Register<IAudioService>(audioService);
         }
 
         public void Register<T>(T service) where T : class

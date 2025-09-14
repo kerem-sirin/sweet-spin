@@ -113,7 +113,7 @@ namespace SweetSpin.Core
                 }
 
                 // Initialize the view with dependencies
-                slotMachineView.Initialize(configuration, symbolService, eventBus);
+                slotMachineView.Initialize(configuration, eventBus, audioService);
 
                 // Initialize state machine with the view's reel controllers
                 stateMachine = new GameStateMachine(gameModel, slotMachineView.Reels, eventBus);
@@ -177,6 +177,9 @@ namespace SweetSpin.Core
                 return;
             }
 
+            // Duck music when spin starts
+            audioService.DuckMusic();
+
             StartCoroutine(ExecuteSpin(isTurboMode));
         }
 
@@ -201,6 +204,9 @@ namespace SweetSpin.Core
 
             // Wait for all reels to stop (adjusted for turbo mode)
             yield return new WaitForSeconds(spinDuration + (configuration.reelCount * reelStopDelay));
+
+            // Stop the spinning sound loop
+            audioService.StopSpinSound();
 
             // Transition to evaluation
             stateMachine.TransitionTo(GameState.Evaluating);
@@ -229,6 +235,9 @@ namespace SweetSpin.Core
 
             // Pass turbo mode to win presentation for faster animations
             yield return ShowWinPresentation(spinResult, isTurboMode);
+
+            // Restore music volume after everything is done
+            audioService.RestoreMusic();
 
             // Return to idle
             stateMachine.TransitionTo(GameState.Idle);
@@ -259,6 +268,9 @@ namespace SweetSpin.Core
             }
             else
             {
+                // Play no-win sound for losses
+                audioService.PlayWinSound(WinTier.None);
+
                 slotMachineView.ShowWinMessage("Try Again!", WinTier.None);
 
                 // only wait 1 frame to let message show briefly
@@ -316,7 +328,7 @@ namespace SweetSpin.Core
 
         private void OnReelStopped(ReelStoppedEvent e)
         {
-            Debug.Log($"Reel {e.ReelIndex} stopped");
+            audioService.PlayReelStop(e.ReelIndex);
         }
 
         private void ChangeBet(int direction)
@@ -339,6 +351,9 @@ namespace SweetSpin.Core
         {
             int previousCredits = gameModel.Credits;
             ModifyCredits(e.Amount);
+
+            // Play coin drop sound when credits are added
+            audioService.PlayCoinDrop();
 
             eventBus.Publish(new CreditsChangedEvent(previousCredits, gameModel.Credits));
             slotMachineView.ShowWinMessage($"+{e.Amount} Credits!", WinTier.Small);
@@ -363,6 +378,9 @@ namespace SweetSpin.Core
 
         private IEnumerator ExecuteAutoPlaySequence()
         {
+            // Duck music at the start of auto-play sequence
+            audioService.DuckMusic();
+
             while (autoPlayService.ShouldContinue())
             {
                 // Check if we can afford to spin
@@ -392,6 +410,9 @@ namespace SweetSpin.Core
                     stateMachine.TransitionTo(GameState.Idle);
                 }
             }
+
+            // Restore music when auto-play ends
+            audioService.RestoreMusic();
         }
 
         [ContextMenu("Debug/Add 100 Credits")]
