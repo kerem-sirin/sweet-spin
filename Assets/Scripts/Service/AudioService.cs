@@ -78,7 +78,6 @@ namespace SweetSpin
         {
             InitializeAudioSources();
             LoadVolumeSettings();
-            DontDestroyOnLoad(gameObject);
         }
 
         private void Start()
@@ -206,7 +205,7 @@ namespace SweetSpin
             return source;
         }
 
-        private void PlaySFX(AudioClip clip, float volumeScale = 1f, float pitch = 1f)
+        public void PlaySFX(AudioClip clip, float volumeScale = 1f, float pitch = 1f)
         {
             if (!enableSFX || clip == null) return;
 
@@ -364,7 +363,10 @@ namespace SweetSpin
 
         public void PlaySpinSound()
         {
-            PlaySFX(reelStartSound);
+            if (reelStartSound != null)
+            {
+                PlaySFX(reelStartSound);
+            }
 
             // Start spinning loop sound
             if (reelSpinLoopSound != null && currentSpinLoopSource == null)

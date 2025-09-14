@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: c314468fde9b7c64e9970bc932081474
+guid: f9099864f44e86241a75fb1ff6c7772d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4804616371359748220
-    second: PigHead_0
+      213: 7192172612324882903
+    second: PigHead2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PigHead_0
+      name: PigHead2_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 544
-        height: 525
+        width: 515
+        height: 464
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c709ce0422d6da240800000000000000
-      internalID: 4804616371359748220
+      spriteID: 7d9fae892eabfc360800000000000000
+      internalID: 7192172612324882903
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PigHead_0: 4804616371359748220
+      PigHead2_0: 7192172612324882903
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 1438e91d9f6b8984ea285ba793b00a6f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274456
+  packageName: uGUI Particles - UI Particles Image for Canvas
+  packageVersion: 1.2.3
+  assetPath: Assets/Kamgam/UGUIParticles/Scripts/EditorScripts/CrossCompileCallbacks.cs
+  uploadId: 712907

@@ -33,7 +33,6 @@ namespace SweetSpin.Core
         {
             // Register core services
             Register<IEventBus>(new EventBus());
-            Register<IAudioService>(new AudioService());
             Register<ISaveService>(new SaveService());
             Register<IRandomService>(new RandomService());
             Register<IPaylineService>(new PaylineService());

@@ -31,6 +31,7 @@ namespace SweetSpin.Core
 
         [Header("Visual Effects")]
         [SerializeField] private ParticleSystem winParticles;
+        [SerializeField] private ParticleSystem spinButtonParticles;
 
         private Reel[] reel;
         private SlotMachineConfiguration configuration;
@@ -71,6 +72,7 @@ namespace SweetSpin.Core
                 eventBus.Unsubscribe<SpinStartedEvent>(OnSpinStarted);
                 eventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
             }
+            spinButton?.onClick.RemoveAllListeners();
         }
 
         private void CreateReels()
@@ -122,6 +124,9 @@ namespace SweetSpin.Core
                 eventBus.Subscribe<CreditsChangedEvent>(OnCreditsChanged);
                 eventBus.Subscribe<InsufficientCreditsEvent>(OnInsufficientCredits);
             }
+
+            // Setup button listeners
+            spinButton?.onClick.AddListener(() => {spinButtonParticles?.Play();});
         }
 
         private void OnInsufficientCredits(InsufficientCreditsEvent e)

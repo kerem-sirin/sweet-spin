@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 9a022fd7401ee0c4a986056f8fb23712
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274456
+  packageName: uGUI Particles - UI Particles Image for Canvas
+  packageVersion: 1.2.3
+  assetPath: Assets/Kamgam/UGUIParticles/Scripts/ParticleImage.MenuItem.cs
+  uploadId: 712907
