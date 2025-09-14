@@ -242,6 +242,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d9250fe4ff661f4a8d867aa65ea193c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  audioMixer: {fileID: 24100000, guid: e6f50d231c39bf54ebda4def7bad4369, type: 2}
+  musicMixerGroup: {fileID: 8885291960380657180, guid: e6f50d231c39bf54ebda4def7bad4369, type: 2}
+  sfxMixerGroup: {fileID: -6606900519897744275, guid: e6f50d231c39bf54ebda4def7bad4369, type: 2}
   mainMusic: {fileID: 8300000, guid: f9ecf8a8bd30c5d4bbca5682ff67c41e, type: 3}
   musicDuckingLevel: 0.4
   duckFadeTime: 0.5

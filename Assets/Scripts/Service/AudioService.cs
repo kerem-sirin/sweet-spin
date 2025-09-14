@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace SweetSpin
 {
@@ -9,6 +10,16 @@ namespace SweetSpin
     /// </summary>
     public class AudioService : MonoBehaviour, IAudioService
     {
+        private const string musicVolumeParameter = "MusicVolume";
+        private const string sfxVolumeParameter = "SFXVolume";
+        private const float MIN_MIXER_DB = -80f;
+        private const float MAX_MIXER_DB = 0f;
+
+        [Header("Audio Mixer")]
+        [SerializeField] private AudioMixer audioMixer;
+        [SerializeField] private AudioMixerGroup musicMixerGroup;
+        [SerializeField] private AudioMixerGroup sfxMixerGroup;
+
         [Header("Music Clips")]
         [SerializeField] private AudioClip mainMusic;
 
@@ -86,7 +97,13 @@ namespace SweetSpin
                 musicSource = musicGO.AddComponent<AudioSource>();
                 musicSource.loop = true;
                 musicSource.playOnAwake = false;
-                musicSource.priority = 128; // Higher priority for music
+                musicSource.priority = 128;
+            }
+
+            // Assign mixer group to music source
+            if (musicMixerGroup != null)
+            {
+                musicSource.outputAudioMixerGroup = musicMixerGroup;
             }
 
             // Create SFX source pool
@@ -101,12 +118,27 @@ namespace SweetSpin
                     sfxGO.transform.SetParent(transform);
                     AudioSource source = sfxGO.AddComponent<AudioSource>();
                     source.playOnAwake = false;
-                    source.priority = 256; // Lower priority for SFX
+                    source.priority = 256;
+
+                    // Assign mixer group to each SFX source
+                    if (sfxMixerGroup != null)
+                    {
+                        source.outputAudioMixerGroup = sfxMixerGroup;
+                    }
+
                     sfxSources[i] = source;
                 }
             }
 
             availableSfxSources.AddRange(sfxSources);
+        }
+
+        // Convert linear volume (0-1) to decibels for mixer
+        private float LinearToDecibel(float linear)
+        {
+            if (linear <= 0f)
+                return MIN_MIXER_DB;
+            return Mathf.Log10(linear) * 20f;
         }
 
         private void LoadVolumeSettings()
@@ -133,20 +165,23 @@ namespace SweetSpin
 
         private void ApplyVolumeSettings()
         {
-            if (musicSource != null)
+            // Set mixer volumes
+            if (audioMixer != null)
             {
-                float duckMultiplier = isMusicDucked ? musicDuckingLevel : 1f;
-                musicSource.volume = musicVolume * masterVolume * duckMultiplier;
-                musicSource.mute = !enableMusic;
+                // Music channel
+                float musicDb = enableMusic ? LinearToDecibel(musicVolume * masterVolume) : MIN_MIXER_DB;
+                audioMixer.SetFloat(musicVolumeParameter, musicDb);
+
+                // SFX channel  
+                float sfxDb = enableSFX ? LinearToDecibel(sfxVolume * masterVolume) : MIN_MIXER_DB;
+                audioMixer.SetFloat(sfxVolumeParameter, sfxDb);
             }
 
-            foreach (var source in sfxSources)
+            // Handle ducking separately on the music source
+            if (musicSource != null && enableMusic)
             {
-                if (source != null)
-                {
-                    source.volume = sfxVolume * masterVolume;
-                    source.mute = !enableSFX;
-                }
+                float duckMultiplier = isMusicDucked ? musicDuckingLevel : 1f;
+                musicSource.volume = duckMultiplier;
             }
         }
 
@@ -302,7 +337,7 @@ namespace SweetSpin
         private IEnumerator FadeMusicVolume(float targetMultiplier, float duration)
         {
             float startVolume = musicSource.volume;
-            float targetVolume = musicVolume * masterVolume * targetMultiplier;
+            float targetVolume = targetMultiplier; // Now just the duck multiplier
 
             float elapsed = 0f;
             while (elapsed < duration)
@@ -320,7 +355,6 @@ namespace SweetSpin
         public void PlayButtonClick()
         {
             PlaySFX(buttonClickSound, 0.8f);
-            Debug.Log("[Audio] Button click");
         }
 
         public void PlayButtonHover()
@@ -462,6 +496,21 @@ namespace SweetSpin
         public void ToggleMusic()
         {
             enableMusic = !enableMusic;
+
+            if (enableMusic && musicSource != null)
+            {
+                // If enabling and music isn't playing, start it
+                if (!musicSource.isPlaying && mainMusic != null)
+                {
+                    PlayMusic(mainMusic, false); // No fade for resume
+                }
+            }
+            else if (!enableMusic && musicSource != null)
+            {
+                // Just mute via mixer, don't stop the music
+                // This way position is maintained
+            }
+
             ApplyVolumeSettings();
             SaveVolumeSettings();
         }
