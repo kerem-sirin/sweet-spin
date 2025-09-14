@@ -30,9 +30,17 @@ namespace SweetSpin.Core
         public float turboSnapDuration = 0.1f;
         public float autoPlayDelayTurbo = 0.5f;
 
+        [Header("Win Animation Settings")]
+        public float sequentialAnimationDelay = 1f; // Delay between different winning lines
+        public float turboSequentialDelay = 0.3f; // Faster delay for turbo mode
+
         [Header("Symbols")]
         public SymbolData[] symbolDatabase;
         public int[] SymbolWeights => new int[] { 30, 25, 20, 15, 10, 8, 5, 3 };
+
+        [Header("Win Frame Colors")]
+        [Tooltip("Colors for win frames on different paylines")]
+        public Color[] winFrameColors;
 
         [Header("Paylines")]
         [SerializeField] private TextAsset paylineJSONFile; // JSON file containing payline configuration
@@ -76,6 +84,16 @@ namespace SweetSpin.Core
         public float bigWinMultiplier = 10f;
         public float megaWinMultiplier = 25f;
         public float jackpotMultiplier = 50f;
+
+        // You can also add a method to safely get colors:
+        public Color GetWinFrameColor(int index)
+        {
+            if (winFrameColors != null && index >= 0 && index < winFrameColors.Length)
+            {
+                return winFrameColors[index];
+            }
+            return Color.yellow; // Default fallback
+        }
 
         /// <summary>
         /// Loads and parses payline patterns from JSON file
