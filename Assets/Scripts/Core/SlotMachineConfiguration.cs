@@ -176,7 +176,7 @@ namespace SweetSpin.Core
             }
         }
 
-        // Editor helper to validate JSON when file changes
+        // Reload paylines when JSON changes in inspector
         private void OnValidate()
         {
             // Force reload when JSON file is changed in inspector

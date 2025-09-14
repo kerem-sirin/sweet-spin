@@ -60,7 +60,7 @@ namespace SweetSpin.Animation
             // Disable game input during intro
             DisableGameInput();
 
-            // Initial setup - hide everything except background
+            // Hide UI for intro
             if (backgroundGroup != null)
                 backgroundGroup.alpha = 1f;
 

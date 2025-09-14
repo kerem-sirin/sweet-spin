@@ -100,9 +100,6 @@ namespace SweetSpin.Core
             }
         }
 
-        /// <summary>
-        /// Check if the spin resulted in any win
-        /// </summary>
         public bool IsWin => TotalWin > 0;
 
         /// <summary>

@@ -9,7 +9,7 @@ namespace SweetSpin
         public SymbolType symbol;
         public int matchCount;
         public int winAmount;
-        public int[] positions; // The reel positions that form this win
+        public int[] positions; // Which rows won
 
         public PaylineWin(int line, SymbolType sym, int matches, int amount, int[] pos)
         {

@@ -6,19 +6,12 @@ namespace SweetSpin
     /// </summary>
     public enum GameState
     {
-        /// <summary>Player can interact with the game</summary>
-        Idle,
-        /// <summary>Reels are currently spinning</summary>
-        Spinning,
-        /// <summary>System is calculating win results</summary>
-        Evaluating,
-        /// <summary>Displaying win animations and results</summary>
-        ShowingWin,
-        /// <summary>Auto-play is active and waiting for next spin</summary>
-        AutoPlayWaiting,
-        /// <summary>Bonus game or free spins active</summary>
-        Bonus,
-        /// <summary>No credits remaining</summary>
-        GameOver
+        Idle,               // Ready for input
+        Spinning,           // Reels are spinning
+        Evaluating,         // Evaluating the outcome of the spin
+        ShowingWin,         // Showing win animations
+        AutoPlayWaiting,    // Waiting for the next auto-play spin
+        Bonus,              // Bonus game or free spins active
+        GameOver            // No credits remaining
     }
 }

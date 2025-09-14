@@ -65,7 +65,7 @@ namespace SweetSpin
                     RectTransform rt = tempSymbol.GetComponent<RectTransform>();
                     if (rt != null)
                     {
-                        // Force layout update to get accurate height
+                        // Need this or height returns 0
                         Canvas.ForceUpdateCanvases();
                         symbolHeight = rt.rect.height;
 

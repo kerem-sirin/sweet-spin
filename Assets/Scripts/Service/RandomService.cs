@@ -1,9 +1,7 @@
-using UnityEngine;
-
 namespace SweetSpin
 {
     /// <summary>
-    /// Random service for testable RNG
+    /// Wrapper for RNG (makes testing easier)
     /// </summary>
     public class RandomService : IRandomService
     {

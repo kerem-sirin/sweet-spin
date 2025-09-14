@@ -4,9 +4,7 @@ using System;
 namespace SweetSpin.Simulation.Data
 {
     /// <summary>
-    /// Aggregated statistical analysis of simulation results including win frequencies,
-    /// payout distributions, symbol performance metrics, and line hit patterns.
-    /// Provides key metrics for game balance evaluation.
+    /// Stats from simulation runs - win rates, payouts, etc.
     /// </summary>
     [Serializable]
     public class SimulationStatistics

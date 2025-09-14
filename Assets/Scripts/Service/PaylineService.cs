@@ -81,7 +81,7 @@ namespace SweetSpin
             // Check for winning combination
             SymbolType firstSymbol = lineSymbols[0];
 
-            // Skip if first symbol is Wild (Wilds don't start combinations)
+            // Wilds can't start a line
             if (firstSymbol == SymbolType.Wild)
             {
                 for (int i = 1; i < 5; i++)
