@@ -18,6 +18,17 @@ MonoBehaviour:
   spinSpeed: 1600
   spinDuration: 2
   reelStopDelay: 0.3
+  snapDuration: 0.3
+  autoPlayDelay: 1
+  turboModeEnabled: 0
+  turboSpinSpeed: 3200
+  turboSpinDuration: 0.5
+  turboReelStopDelay: 0.05
+  turboWinDisplayTime: 0.5
+  turboSnapDuration: 0.1
+  autoPlayDelayTurbo: 0.5
+  sequentialAnimationDelay: 1
+  turboSequentialDelay: 0.3
   symbolDatabase:
   - type: 0
     sprite: {fileID: -3657720759404234663, guid: e293d7630ca016b439b384d84ed98ca6, type: 3}
@@ -43,6 +54,17 @@ MonoBehaviour:
   - type: 7
     sprite: {fileID: -5704953304545078335, guid: 7a86c193fb2fac140aa0e3d8e5a47873, type: 3}
     payouts: 64000000c8000000f4010000
+  winFrameColors:
+  - {r: 0.6598739, g: 0.962264, b: 0.2314879, a: 1}
+  - {r: 0.9103772, g: 0.07729603, b: 0.4402226, a: 1}
+  - {r: 0.9103772, g: 0.89408433, b: 0.17176916, a: 1}
+  - {r: 0.27451923, g: 0.54018325, b: 0.9386791, a: 1}
+  - {r: 0.9103772, g: 0.62762314, b: 0.10735568, a: 1}
+  - {r: 0.46678948, g: 0.22806141, b: 0.966981, a: 1}
+  - {r: 0.78823537, g: 0.2392157, b: 0.21568629, a: 1}
+  - {r: 0.14611505, g: 0.77410305, b: 0.9386791, a: 1}
+  - {r: 0.7333752, g: 0.15641674, b: 0.8962263, a: 1}
+  - {r: 0.8867892, g: 0.9150942, b: 0.18129213, a: 1}
   paylineJSONFile: {fileID: 4900000, guid: becf426f39d001149858dbe43587227f, type: 3}
   startingCredits: 1000
   minBetPerLine: 1

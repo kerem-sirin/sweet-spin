@@ -880,7 +880,8 @@ MonoBehaviour:
   paytableDisplay: {fileID: 8241166747166351106}
   creditPurchasePanel: {fileID: 7911704820772228617}
   winParticles: {fileID: 0}
-  winLineRenderer: {fileID: 0}
+  sequentialAnimationDelay: 1
+  turboSequentialDelay: 0.3
 --- !u!223 &2170933364543003551
 Canvas:
   m_ObjectHideFlags: 0

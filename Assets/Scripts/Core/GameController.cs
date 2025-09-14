@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SweetSpin.Core
@@ -246,23 +247,22 @@ namespace SweetSpin.Core
                 // Show win message with effects
                 slotMachineView.ShowWinMessage(result.GetWinMessage(), tier);
 
-                // Animate winning lines
-                foreach (var win in result.Wins)
-                {
-                    slotMachineView.AnimateWinningLine(win);
-                }
+                // Start the animation coroutine and wait for it to complete
+                yield return StartCoroutine(slotMachineView.AnimateMultipleWinningLinesCoroutine(result.Wins, isTurboMode));
 
-                // Shorter display time in turbo mode
-                float displayTime = isTurboMode ? 0.5f : 2f;
-                yield return new WaitForSeconds(displayTime);
+                // Additional hold time after all animations complete
+                float additionalHoldTime = isTurboMode ? configuration.turboSequentialDelay : configuration.sequentialAnimationDelay;
+                yield return new WaitForSeconds(additionalHoldTime);
+
+                // Clear win animations after presentation
+                slotMachineView.ClearAllWinAnimations();
             }
             else
             {
                 slotMachineView.ShowWinMessage("Try Again!", WinTier.None);
 
-                // Shorter delay in turbo mode
-                float displayTime = isTurboMode ? 0.2f : 0.5f;
-                yield return new WaitForSeconds(displayTime);
+                // only wait 1 frame to let message show briefly
+                yield return null;
             }
         }
 
@@ -422,6 +422,88 @@ namespace SweetSpin.Core
         {
             ModifyCredits(amount);
             Debug.Log($"Added {amount} credits. New balance: {gameModel.Credits}");
+        }
+
+        [ContextMenu("Debug/Test Single Win")]
+        private void TestSingleWin()
+        {
+            CreateTestWin(1);
+        }
+
+        [ContextMenu("Debug/Test Double Win")]
+        private void TestDoubleWin()
+        {
+            CreateTestWin(2);
+        }
+
+        [ContextMenu("Debug/Test Triple Win")]
+        private void TestTripleWin()
+        {
+            CreateTestWin(3);
+        }
+
+        [ContextMenu("Debug/Test 5 Line Win")]
+        private void TestFiveLineWin()
+        {
+            CreateTestWin(5);
+        }
+
+        [ContextMenu("Debug/Test Max Win (10 lines)")]
+        private void TestMaxWin()
+        {
+            CreateTestWin(10);
+        }
+
+        private void CreateTestWin(int lineCount)
+        {
+            if (gameModel == null || slotMachineView == null)
+            {
+                Debug.LogError("Game not properly initialized for testing");
+                return;
+            }
+
+            // Create fake win data for testing
+            var testWins = new List<PaylineWin>();
+
+            for (int i = 0; i < lineCount; i++)
+            {
+                // Create a test winning line
+                var positions = new int[] { 1, 1, 1, 1, 1 }; // All middle row for simplicity
+
+                var win = new PaylineWin(
+                    i,                          // payline index
+                    SymbolType.Cherry,          // symbol type
+                    3,                          // match count
+                    50 * gameModel.BetPerLine,  // win amount
+                    positions                   // positions
+                );
+
+                testWins.Add(win);
+            }
+
+            // Create a test spin result
+            var testGrid = new SymbolType[5, 3];
+            for (int reel = 0; reel < 5; reel++)
+            {
+                for (int row = 0; row < 3; row++)
+                {
+                    testGrid[reel, row] = row == 1 ? SymbolType.Cherry : SymbolType.Lemon;
+                }
+            }
+
+            var testResult = new SpinResult(testGrid, gameModel.CurrentBet);
+            testResult.SetWins(testWins);
+
+            // Show the win presentation
+            Debug.Log($"Testing {lineCount} winning lines");
+            StartCoroutine(ShowWinPresentation(testResult, isTurboMode));
+        }
+
+        [ContextMenu("Debug/Toggle Turbo for Testing")]
+        private void ToggleTurboForTesting()
+        {
+            isTurboMode = !isTurboMode;
+            Debug.Log($"Turbo mode for testing: {(isTurboMode ? "ON" : "OFF")}");
         }
     }
 }

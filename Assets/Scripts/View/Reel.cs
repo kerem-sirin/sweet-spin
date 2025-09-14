@@ -115,6 +115,50 @@ namespace SweetSpin
             Canvas.ForceUpdateCanvases();
         }
 
+        /// <summary>
+        /// Animate a specific symbol position with win effect
+        /// </summary>
+        /// <param name="rowIndex">Row position of the symbol</param>
+        /// <param name="frameColor">Color for the win frame</param>
+        /// <param name="animationDelay">Delay before starting animation</param>
+        /// <param name="animationDuration">Total duration for the win animation</param>
+        public void AnimateSymbolAt(int rowIndex, Color frameColor, float animationDelay, float animationDuration)
+        {
+            var visibleSymbols = GetVisibleSymbols();
+            if (rowIndex >= 0 && rowIndex < visibleSymbols.Length)
+            {
+                visibleSymbols[rowIndex].AnimateWin(frameColor, animationDelay, animationDuration);
+            }
+        }
+
+        /// <summary>
+        /// Clear win animations from all symbols in this reel
+        /// </summary>
+        public void ClearWinAnimations()
+        {
+            foreach (var symbol in symbols)
+            {
+                if (symbol != null)
+                {
+                    symbol.StopWinAnimation();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Instantly clear all win animations (for emergency cleanup)
+        /// </summary>
+        public void ClearWinAnimationsInstant()
+        {
+            foreach (var symbol in symbols)
+            {
+                if (symbol != null)
+                {
+                    symbol.ResetToNormal();
+                }
+            }
+        }
+
         private void CreateSymbols()
         {
             // Clear existing symbols
@@ -312,16 +356,6 @@ namespace SweetSpin
             // Fallback: calculate position
             float yOffset = (row - 1) * -symbolHeight; // row 1 (middle) is at 0
             return transform.position + new Vector3(0, yOffset, 0);
-        }
-
-        // Add this method to Reel.cs
-        public void AnimateSymbolAt(int row)
-        {
-            var visibleSymbols = GetVisibleSymbols();
-            if (row >= 0 && row < visibleSymbols.Length)
-            {
-                visibleSymbols[row].AnimateWin();
-            }
         }
     }
 }
