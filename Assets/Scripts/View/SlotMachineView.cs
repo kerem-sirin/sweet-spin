@@ -63,6 +63,16 @@ namespace SweetSpin.Core
             winText.text = "";
         }
 
+        private void OnDestroy()
+        {
+            // Unsubscribe from events
+            if (eventBus != null)
+            {
+                eventBus.Unsubscribe<SpinStartedEvent>(OnSpinStarted);
+                eventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
+            }
+        }
+
         private void CreateReels()
         {
             if (reelContainer == null)
@@ -88,7 +98,15 @@ namespace SweetSpin.Core
                     controller = reelGO.AddComponent<Reel>();
 
                 // Initialize the controller
-                controller.Initialize(i, configuration.symbolDatabase, configuration.spinSpeed, configuration.spinDuration, configuration.reelStopDelay);
+                controller.Initialize(
+                    i,
+                    configuration.symbolDatabase,
+                    configuration.spinSpeed,
+                    configuration.spinDuration,
+                    configuration.reelStopDelay,
+                    configuration.snapDuration,
+                    configuration.turboSnapDuration 
+                );
                 reel[i] = controller;
             }
 
@@ -101,7 +119,6 @@ namespace SweetSpin.Core
             if (eventBus != null)
             {
                 eventBus.Subscribe<SpinStartedEvent>(OnSpinStarted);
-                eventBus.Subscribe<SpinCompletedEvent>(OnSpinCompleted);
                 eventBus.Subscribe<CreditsChangedEvent>(OnCreditsChanged);
             }
 
@@ -119,7 +136,7 @@ namespace SweetSpin.Core
         /// <summary>
         /// Start spinning reels with the given results
         /// </summary>
-        public void SpinReels(SymbolType[,] results)
+        public void SpinReels(SymbolType[,] results, float spinSpeed, float spinDuration, float reelStopDelay)
         {
             for (int i = 0; i < reel.Length; i++)
             {
@@ -129,8 +146,9 @@ namespace SweetSpin.Core
                     reelSymbols[j] = results[i, j];
                 }
 
-                float delay = i * configuration.reelStopDelay;
-                reel[i].Spin(reelSymbols, delay);
+                float delay = i * reelStopDelay;
+                // Pass the timing parameters to each reel
+                reel[i].Spin(reelSymbols, spinSpeed, spinDuration, delay);
             }
         }
 
@@ -203,23 +221,10 @@ namespace SweetSpin.Core
         // Event handlers
         private void OnSpinStarted(SpinStartedEvent e)
         {
-            if (spinButton != null)
-            {
-                spinButton.interactable = false;
-            }
-
             if (winText != null)
             {
                 winText.text = "Spinning...";
                 winText.color = Color.white;
-            }
-        }
-
-        private void OnSpinCompleted(SpinCompletedEvent e)
-        {
-            if (spinButton != null)
-            {
-                spinButton.interactable = true;
             }
         }
 
@@ -230,17 +235,6 @@ namespace SweetSpin.Core
             {
                 // Simple update for now
                 creditsText.text = e.NewCredits.ToString();
-            }
-        }
-
-        private void OnDestroy()
-        {
-            // Unsubscribe from events
-            if (eventBus != null)
-            {
-                eventBus.Unsubscribe<SpinStartedEvent>(OnSpinStarted);
-                eventBus.Unsubscribe<SpinCompletedEvent>(OnSpinCompleted);
-                eventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
             }
         }
     }

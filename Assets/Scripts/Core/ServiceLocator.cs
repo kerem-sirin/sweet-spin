@@ -38,6 +38,7 @@ namespace SweetSpin.Core
             Register<IRandomService>(new RandomService());
             Register<IPaylineService>(new PaylineService());
             Register<ISymbolService>(new SymbolService());
+            Register<IAutoPlayService>(new AutoPlayService());
         }
 
         public void Register<T>(T service) where T : class

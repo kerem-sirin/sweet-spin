@@ -22,11 +22,15 @@ namespace SweetSpin.Core
         private IRandomService randomService;
         private IPaylineService paylineService;
         private ISymbolService symbolService;
+        private IAutoPlayService autoPlayService;
 
         // Game components
         private SlotMachineModel gameModel;
         private SlotMachineView slotMachineView;
         private GameStateMachine stateMachine;
+        private AutoPlayService autoPlayManager;
+
+        private bool isTurboMode = false;
 
         private void Start()
         {
@@ -34,6 +38,32 @@ namespace SweetSpin.Core
             InitializeGame();
             CreateView();
             SetupUI();
+        }
+
+        private void OnDestroy()
+        {
+            // Unsubscribe from events
+            if (eventBus != null)
+            {
+                eventBus.Unsubscribe<SpinStartedEvent>(OnSpinStarted);
+                eventBus.Unsubscribe<SpinCompletedEvent>(OnSpinCompleted);
+                eventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
+                eventBus.Unsubscribe<ReelStoppedEvent>(OnReelStopped);
+                eventBus.Unsubscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
+                eventBus.Unsubscribe<TurboModeChangedEvent>(OnTurboModeChanged);
+                eventBus.Unsubscribe<AutoPlayStartedEvent>(OnAutoPlayStarted);
+            }
+
+            // Save game state
+            if (saveService != null && gameModel != null)
+            {
+                saveService.SaveCredits(gameModel.Credits);
+            }
+        }
+
+        private void OnTurboModeChanged(TurboModeChangedEvent e)
+        {
+            isTurboMode = e.IsEnabled;
         }
 
         private void InitializeServices()
@@ -45,10 +75,12 @@ namespace SweetSpin.Core
             randomService = ServiceLocator.Instance.Get<IRandomService>();
             paylineService = ServiceLocator.Instance.Get<IPaylineService>();
             symbolService = ServiceLocator.Instance.Get<ISymbolService>();
+            autoPlayService = ServiceLocator.Instance.Get<IAutoPlayService>();
 
             // Initialize services with configuration
             symbolService.Initialize(configuration.symbolDatabase);
             paylineService.Initialize(configuration.paylinePatterns);
+            autoPlayService.Initialize(eventBus);
 
             // Initialize PaylineService properly
             var paylineServiceImpl = ServiceLocator.Instance.Get<IPaylineService>() as PaylineService;
@@ -120,6 +152,8 @@ namespace SweetSpin.Core
             eventBus.Subscribe<CreditsChangedEvent>(OnCreditsChanged);
             eventBus.Subscribe<ReelStoppedEvent>(OnReelStopped);
             eventBus.Subscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
+            eventBus.Subscribe<TurboModeChangedEvent>(OnTurboModeChanged);
+            eventBus.Subscribe<AutoPlayStartedEvent>(OnAutoPlayStarted);
         }
 
         private void OnSpinButtonClick()
@@ -142,10 +176,10 @@ namespace SweetSpin.Core
                 return;
             }
 
-            StartCoroutine(ExecuteSpin());
+            StartCoroutine(ExecuteSpin(isTurboMode));
         }
 
-        private IEnumerator ExecuteSpin()
+        private IEnumerator ExecuteSpin(bool isTurboMode = false)
         {
             // Change state
             stateMachine.TransitionTo(GameState.Spinning);
@@ -156,12 +190,16 @@ namespace SweetSpin.Core
             // Publish spin started event
             eventBus.Publish(new SpinStartedEvent(gameModel.CurrentBet));
 
-            // Tell the view to spin the reels
-            slotMachineView.SpinReels(spinResult.Grid);
+            // Calculate timing based on turbo mode
+            float spinDuration = isTurboMode ? configuration.turboSpinDuration : configuration.spinDuration;
+            float reelStopDelay = isTurboMode ? configuration.turboReelStopDelay : configuration.reelStopDelay;
+            float spinSpeed = isTurboMode ? configuration.turboSpinSpeed : configuration.spinSpeed;
 
-            // Wait for all reels to stop
-            yield return new WaitForSeconds(configuration.spinDuration +
-                (configuration.reelCount * configuration.reelStopDelay));
+            // Tell the view to spin the reels with appropriate speed
+            slotMachineView.SpinReels(spinResult.Grid, spinSpeed, spinDuration, reelStopDelay);
+
+            // Wait for all reels to stop (adjusted for turbo mode)
+            yield return new WaitForSeconds(spinDuration + (configuration.reelCount * reelStopDelay));
 
             // Transition to evaluation
             stateMachine.TransitionTo(GameState.Evaluating);
@@ -187,13 +225,15 @@ namespace SweetSpin.Core
 
             // Show results
             stateMachine.TransitionTo(GameState.ShowingWin);
-            yield return ShowWinPresentation(spinResult);
+
+            // Pass turbo mode to win presentation for faster animations
+            yield return ShowWinPresentation(spinResult, isTurboMode);
 
             // Return to idle
             stateMachine.TransitionTo(GameState.Idle);
         }
 
-        private IEnumerator ShowWinPresentation(SpinResult result)
+        private IEnumerator ShowWinPresentation(SpinResult result, bool isTurboMode = false)
         {
             if (result.IsWin)
             {
@@ -212,12 +252,17 @@ namespace SweetSpin.Core
                     slotMachineView.AnimateWinningLine(win);
                 }
 
-                yield return new WaitForSeconds(2f);
+                // Shorter display time in turbo mode
+                float displayTime = isTurboMode ? 0.5f : 2f;
+                yield return new WaitForSeconds(displayTime);
             }
             else
             {
                 slotMachineView.ShowWinMessage("Try Again!", WinTier.None);
-                yield return new WaitForSeconds(0.5f);
+
+                // Shorter delay in turbo mode
+                float displayTime = isTurboMode ? 0.2f : 0.5f;
+                yield return new WaitForSeconds(displayTime);
             }
         }
 
@@ -310,22 +355,42 @@ namespace SweetSpin.Core
             }
         }
 
-        private void OnDestroy()
+        private void OnAutoPlayStarted(AutoPlayStartedEvent e)
         {
-            // Unsubscribe from events
-            if (eventBus != null)
-            {
-                eventBus.Unsubscribe<SpinStartedEvent>(OnSpinStarted);
-                eventBus.Unsubscribe<SpinCompletedEvent>(OnSpinCompleted);
-                eventBus.Unsubscribe<CreditsChangedEvent>(OnCreditsChanged);
-                eventBus.Unsubscribe<ReelStoppedEvent>(OnReelStopped);
-                eventBus?.Unsubscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
-            }
+            // Start the auto-play coroutine
+            StartCoroutine(ExecuteAutoPlaySequence());
+        }
 
-            // Save game state
-            if (saveService != null && gameModel != null)
+        private IEnumerator ExecuteAutoPlaySequence()
+        {
+            while (autoPlayService.ShouldContinue())
             {
-                saveService.SaveCredits(gameModel.Credits);
+                // Check if we can afford to spin
+                if (!gameModel.CanSpin())
+                {
+                    autoPlayService.StopDueToInsufficientCredits();
+                    break;
+                }
+
+                // Execute single spin (this handles state transitions internally)
+                yield return ExecuteSpin(isTurboMode);
+
+                // Notify auto-play service that spin completed
+                autoPlayService.OnSpinCompleted();
+
+                // If more spins remain, add delay with proper state
+                if (autoPlayService.ShouldContinue())
+                {
+                    // Transition to waiting state to keep UI locked
+                    stateMachine.TransitionTo(GameState.AutoPlayWaiting);
+
+                    // Wait between spins
+                    float delay = isTurboMode ? configuration.autoPlayDelayTurbo : configuration.autoPlayDelay;
+                    yield return new WaitForSeconds(delay);
+
+                    // Return to idle before next spin
+                    stateMachine.TransitionTo(GameState.Idle);
+                }
             }
         }
 

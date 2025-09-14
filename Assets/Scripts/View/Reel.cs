@@ -19,9 +19,14 @@ namespace SweetSpin
         [SerializeField] private int visibleSymbols = 3;
         [SerializeField] private int bufferSymbols = 2; // Extra symbols above and below for smooth spinning
 
-        private float spinSpeed;
-        private float spinDuration;
-        private float stopDelay;
+        // Default values from configuration
+        private float defaultSpinSpeed;
+        private float defaultSpinDuration;
+        private float defaultStopDelay;
+
+        // Current values for active spin (can be different for turbo mode)
+        private float currentSpinSpeed;
+        private float currentSpinDuration;
 
         private List<ReelSymbol> symbols = new List<ReelSymbol>();
         private SymbolData[] availableSymbols;
@@ -38,6 +43,10 @@ namespace SweetSpin
         public bool IsSpinning => isSpinning;
         public int ReelIndex => reelIndex;
         public float SymbolHeight => symbolHeight;
+
+        private float defaultSnapDuration;
+        private float turboSnapDuration;
+        private bool isInTurboMode = false;
 
         private void Awake()
         {
@@ -81,16 +90,24 @@ namespace SweetSpin
             }
         }
 
-        public void Initialize(int index, SymbolData[] symbolData, float spinSpeed, float spinDuration, float stopDelay)
+        public void Initialize(int index, SymbolData[] symbolData, float spinSpeed, float spinDuration,
+                              float stopDelay, float snapDuration, float turboSnapDur)
         {
             reelIndex = index;
             availableSymbols = symbolData;
 
-            // Set spin configuration
-            this.spinSpeed = spinSpeed;
-            this.spinDuration = spinDuration;
-            this.stopDelay = stopDelay;
+            // Store default configuration values
+            defaultSpinSpeed = spinSpeed;
+            defaultSpinDuration = spinDuration;
+            defaultStopDelay = stopDelay;
 
+            // Set current values to defaults initially
+            currentSpinSpeed = spinSpeed;
+            currentSpinDuration = spinDuration;
+
+            // Store snap durations
+            defaultSnapDuration = snapDuration;  
+            turboSnapDuration = turboSnapDur;
 
             CreateSymbols();
             SetRandomSymbols();
@@ -149,16 +166,16 @@ namespace SweetSpin
             }
         }
 
-        public void Spin(SymbolType[] resultSymbols, float startDelay = -1f)
+        public void Spin(SymbolType[] resultSymbols, float speed, float duration, float startDelay)
         {
             if (isSpinning) return;
 
             targetSymbols = resultSymbols;
             isSpinning = true;
 
-            // Use the configured stopDelay if no override is provided
-            // This allows both: using the reel's default delay, or overriding per spin
-            float actualDelay = startDelay >= 0 ? startDelay : stopDelay * reelIndex;
+            // Use the passed parameters for this spin
+            currentSpinSpeed = speed;
+            currentSpinDuration = duration;
 
             // Kill any existing spin sequence
             spinSequence?.Kill();
@@ -166,16 +183,18 @@ namespace SweetSpin
             spinSequence = DOTween.Sequence();
 
             // Add start delay for staggered reel starts
-            spinSequence.AppendInterval(actualDelay);
+            spinSequence.AppendInterval(startDelay);
 
             // Start spinning animation
             spinSequence.AppendCallback(() => StartSpinning());
 
-            // Spin for duration
-            spinSequence.AppendInterval(spinDuration);
+            // Spin for the specified duration
+            spinSequence.AppendInterval(duration);
 
             // Stop and snap to result
             spinSequence.AppendCallback(() => StopSpinning());
+
+            isInTurboMode = speed > defaultSpinSpeed;
         }
 
         private void StartSpinning()
@@ -187,14 +206,16 @@ namespace SweetSpin
         {
             while (isSpinning)
             {
-                // Move all symbols down
-                currentPosition += spinSpeed * Time.deltaTime;
+                // NOW using currentSpinSpeed instead of spinSpeed
+                currentPosition += currentSpinSpeed * Time.deltaTime;
 
                 foreach (var symbol in symbols)
                 {
                     RectTransform rt = symbol.RectTransform;
                     Vector2 pos = rt.anchoredPosition;
-                    pos.y -= spinSpeed * Time.deltaTime;
+
+                    // Use currentSpinSpeed here too
+                    pos.y -= currentSpinSpeed * Time.deltaTime;
 
                     // Calculate wrap-around threshold using dynamic height
                     float wrapThreshold = -(bufferSymbols + visibleSymbols - 1) * symbolHeight;
@@ -241,7 +262,8 @@ namespace SweetSpin
 
         private void SnapToGrid()
         {
-            float snapDuration = 0.3f;
+            float snapDuration = isInTurboMode ? turboSnapDuration : defaultSnapDuration;
+
             for (int i = 0; i < symbols.Count; i++)
             {
                 RectTransform rt = symbols[i].RectTransform;

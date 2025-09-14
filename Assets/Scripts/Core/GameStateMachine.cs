@@ -32,6 +32,7 @@ namespace SweetSpin.Core
         public void TransitionTo(GameState newState)
         {
             Debug.Log($"State transition: {CurrentState} -> {newState}");
+            var previousState = CurrentState;
 
             // Exit current state
             OnStateExit(CurrentState);
@@ -39,6 +40,9 @@ namespace SweetSpin.Core
             // Enter new state
             CurrentState = newState;
             OnStateEnter(newState);
+
+            // Publish state change event
+            eventBus?.Publish(new GameStateChangedEvent(previousState, newState));
         }
 
         /// <summary>

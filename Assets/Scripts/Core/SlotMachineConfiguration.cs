@@ -12,10 +12,23 @@ namespace SweetSpin.Core
         [Header("Reel Configuration")]
         public int reelCount = 5;
         public int rowCount = 3;
+
+        [Header("Default Mode Settings")]
         public float reelSpacing = 160f;
         public float spinSpeed = 1600;
         public float spinDuration = 2f;
         public float reelStopDelay = 0.3f;
+        public float snapDuration = 0.3f;
+        public float autoPlayDelay = 1f;
+
+        [Header("Turbo Mode Settings")]
+        public bool turboModeEnabled = false;
+        public float turboSpinSpeed = 3200f;      // 2x normal speed
+        public float turboSpinDuration = 0.5f;    // Much shorter than normal 2f
+        public float turboReelStopDelay = 0.05f;  // Almost instant
+        public float turboWinDisplayTime = 0.5f;  // Shorter win display
+        public float turboSnapDuration = 0.1f;
+        public float autoPlayDelayTurbo = 0.5f;
 
         [Header("Symbols")]
         public SymbolData[] symbolDatabase;
