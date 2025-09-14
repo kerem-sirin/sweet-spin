@@ -364,7 +364,10 @@ namespace SweetSpin
 
         public void PlaySpinSound()
         {
-            PlaySFX(reelStartSound);
+            if (reelStartSound != null)
+            {
+                PlaySFX(reelStartSound);
+            }
 
             // Start spinning loop sound
             if (reelSpinLoopSound != null && currentSpinLoopSource == null)
