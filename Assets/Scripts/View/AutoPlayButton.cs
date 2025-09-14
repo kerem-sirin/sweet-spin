@@ -22,7 +22,8 @@ namespace SweetSpin
         [SerializeField] private Sprite autoSprite;
         [SerializeField] private Sprite stopSprite;
 
-        private IAutoPlayService autoPlayService; // Changed to interface
+        private IAutoPlayService autoPlayService;
+        private IAudioService audioService;
         private bool isInAutoPlayMode = false;
 
         protected override void Start()
@@ -32,8 +33,9 @@ namespace SweetSpin
 
             base.Start();
 
-            // Get service from ServiceLocator instead of FindObjectOfType
+            // Get services from service locator
             autoPlayService = ServiceLocator.Instance.Get<IAutoPlayService>();
+            audioService = ServiceLocator.Instance.Get<IAudioService>();
 
             if (button == null)
                 button = GetComponent<Button>();
@@ -71,6 +73,8 @@ namespace SweetSpin
 
         private void OnButtonClick()
         {
+            audioService?.PlayButtonClick();
+
             if (isInAutoPlayMode)
             {
                 // In auto-play mode - request stop

@@ -24,6 +24,7 @@ namespace SweetSpin
         [SerializeField] private Color turboActiveBackgroundColor;
         [SerializeField] private float toggleAnimationDuration = 0.2f;
 
+        private IAudioService audioService;
         private bool isInitialized = false;
 
         protected override void SetLocked(bool locked)
@@ -38,8 +39,9 @@ namespace SweetSpin
         {
             base.Start();
 
-            // Get event bus from service locator
+            // Get services from service locator
             eventBus = ServiceLocator.Instance.Get<IEventBus>();
+            audioService = ServiceLocator.Instance.Get<IAudioService>();
 
             if (eventBus == null)
             {
@@ -104,6 +106,8 @@ namespace SweetSpin
 
         private void OnToggleValueChanged(bool isOn)
         {
+            audioService?.PlayButtonClick();
+
             // Save preference
             PlayerPrefs.SetInt("TurboMode", isOn ? 1 : 0);
             PlayerPrefs.Save();

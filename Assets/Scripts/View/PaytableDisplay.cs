@@ -21,25 +21,38 @@ namespace SweetSpin
         [Header("Settings")]
         [SerializeField] private float animationDuration = 0.3f;
 
+        private IAudioService audioService;
         private SlotMachineConfiguration configuration;
         private List<GameObject> payoutEntries = new List<GameObject>();
         private bool isShowing = false;
 
         private void Start()
         {
+            // Get audio service
+            audioService = ServiceLocator.Instance.Get<IAudioService>();
+
             if (togglePaytableButton != null)
             {
-                togglePaytableButton.onClick.AddListener(TogglePaytable);
+                togglePaytableButton.onClick.AddListener(() => {
+                    audioService?.PlayButtonClick();
+                    TogglePaytable();
+                });
             }
 
             if (closePaytableButton != null)
             {
-                closePaytableButton.onClick.AddListener(HidePaytable);
+                closePaytableButton.onClick.AddListener(() => {
+                    audioService?.PlayButtonClick();
+                    HidePaytable();
+                });
             }
 
             if (backgroundAsButton != null)
             {
-                backgroundAsButton.onClick.AddListener(HidePaytable);
+                backgroundAsButton.onClick.AddListener(() => {
+                    audioService?.PlayButtonClick();
+                    HidePaytable();
+                });
             }
 
             if (paytablePanel != null)

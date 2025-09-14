@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.Rendering.STP;
 
 namespace SweetSpin.Core
 {
@@ -35,8 +34,8 @@ namespace SweetSpin.Core
 
         private Reel[] reel;
         private SlotMachineConfiguration configuration;
-        private ISymbolService symbolService;
         private IEventBus eventBus;
+        private IAudioService audioService;
 
         // Public properties for GameController to access
         public Button SpinButton => spinButton;
@@ -47,11 +46,11 @@ namespace SweetSpin.Core
         /// <summary>
         /// Initialize the view with required dependencies
         /// </summary>
-        public void Initialize(SlotMachineConfiguration config, ISymbolService symbols, IEventBus events)
+        public void Initialize(SlotMachineConfiguration configuration, IEventBus eventBus, IAudioService audioService)
         {
-            configuration = config;
-            symbolService = symbols;
-            eventBus = events;
+            this.configuration = configuration;
+            this.eventBus = eventBus;
+            this.audioService = audioService;
 
             CreateReels();
             SetupEventListeners();
@@ -229,6 +228,9 @@ namespace SweetSpin.Core
             for (int lineIndex = 0; lineIndex < wins.Count; lineIndex++)
             {
                 var win = wins[lineIndex];
+
+                // Play sound for this winning line
+                audioService.PlayWinLineSound(lineIndex);
 
                 // Get color from configuration
                 Color frameColor = configuration.GetWinFrameColor(lineIndex);

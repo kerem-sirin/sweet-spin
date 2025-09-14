@@ -1,4 +1,5 @@
 using DG.Tweening;
+using SweetSpin.Core;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -300,6 +301,10 @@ namespace SweetSpin
 
             // Snap positions to grid
             SnapToGrid();
+
+            // Publish reel stopped event for audio
+            var eventBus = ServiceLocator.Instance.Get<IEventBus>();
+            eventBus?.Publish(new ReelStoppedEvent(reelIndex));
 
             isSpinning = false;
         }
