@@ -1,0 +1,127 @@
+{
+    "timestamp": "2025-09-15 02:47:33",
+    "configurationName": "SlotMachineConfig",
+    "initialCredits": 100000000,
+    "finalCredits": 98639296,
+    "totalTurns": 1000000,
+    "betPerLine": 1,
+    "totalLines": 25,
+    "totalBet": 25000000,
+    "totalWon": 23639296,
+    "rtp": 94.55718231201172,
+    "statistics": {
+        "hitFrequency": 36.804500579833987,
+        "totalWins": 368045,
+        "totalLosses": 631955,
+        "averageWinAmount": 64.22936248779297,
+        "biggestWin": 1231,
+        "biggestWinTurn": 929267,
+        "mostCommonWinningLines": [
+            {
+                "lineIndex": 14,
+                "lineName": "Line 15",
+                "hitCount": 32180,
+                "hitPercentage": 8.74349594116211
+            },
+            {
+                "lineIndex": 20,
+                "lineName": "Line 21",
+                "hitCount": 32180,
+                "hitPercentage": 8.74349594116211
+            },
+            {
+                "lineIndex": 1,
+                "lineName": "Line 2",
+                "hitCount": 31951,
+                "hitPercentage": 8.681275367736817
+            },
+            {
+                "lineIndex": 12,
+                "lineName": "Line 13",
+                "hitCount": 31788,
+                "hitPercentage": 8.636987686157227
+            },
+            {
+                "lineIndex": 7,
+                "lineName": "Line 8",
+                "hitCount": 31762,
+                "hitPercentage": 8.629922866821289
+            }
+        ],
+        "totalLineHits": 790805,
+        "symbolWinFrequency": [
+            {
+                "symbolType": "Cherry",
+                "winCount": 320844,
+                "winPercentage": 87.17520904541016,
+                "totalPrizeAmount": 6216223,
+                "averagePrize": 19.374595642089845
+            },
+            {
+                "symbolType": "Grape",
+                "winCount": 217710,
+                "winPercentage": 59.15309143066406,
+                "totalPrizeAmount": 5961780,
+                "averagePrize": 27.384042739868165
+            },
+            {
+                "symbolType": "Lemon",
+                "winCount": 129163,
+                "winPercentage": 35.0943489074707,
+                "totalPrizeAmount": 4582087,
+                "averagePrize": 35.47522735595703
+            },
+            {
+                "symbolType": "Orange",
+                "winCount": 68847,
+                "winPercentage": 18.70613670349121,
+                "totalPrizeAmount": 3361335,
+                "averagePrize": 48.82326126098633
+            },
+            {
+                "symbolType": "Candy",
+                "winCount": 34122,
+                "winPercentage": 9.271148681640625,
+                "totalPrizeAmount": 1961896,
+                "averagePrize": 57.49651336669922
+            },
+            {
+                "symbolType": "Plum",
+                "winCount": 13819,
+                "winPercentage": 3.754703998565674,
+                "totalPrizeAmount": 950992,
+                "averagePrize": 68.81771850585938
+            },
+            {
+                "symbolType": "Bell",
+                "winCount": 4742,
+                "winPercentage": 1.2884293794631959,
+                "totalPrizeAmount": 419019,
+                "averagePrize": 88.36334991455078
+            },
+            {
+                "symbolType": "Bar",
+                "winCount": 1210,
+                "winPercentage": 0.3287641406059265,
+                "totalPrizeAmount": 131106,
+                "averagePrize": 108.35206604003906
+            },
+            {
+                "symbolType": "Seven",
+                "winCount": 348,
+                "winPercentage": 0.09455365687608719,
+                "totalPrizeAmount": 54858,
+                "averagePrize": 157.63792419433595
+            }
+        ],
+        "smallWins": 327801,
+        "mediumWins": 34913,
+        "bigWins": 5256,
+        "megaWins": 75,
+        "jackpotWins": 0,
+        "threeOfKindWins": 296443,
+        "fourOfKindWins": 56850,
+        "fiveOfKindWins": 14752
+    },
+    "turns": []
+}
