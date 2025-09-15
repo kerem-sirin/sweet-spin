@@ -34,7 +34,7 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: e293d7630ca016b439b384d84ed98ca6, type: 3}
     payouts: 0e0000001d0000003f000000
   - type: 1
-    sprite: {fileID: 21300000, guid: 7a86c193fb2fac140aa0e3d8e5a47873, type: 3}
+    sprite: {fileID: 21300000, guid: 92bb0b17f64619f4a979af1270499aa1, type: 3}
     payouts: 150000002b00000056000000
   - type: 2
     sprite: {fileID: 21300000, guid: 6f52d7c75d0ca294ab75ecbf92a1e381, type: 3}
