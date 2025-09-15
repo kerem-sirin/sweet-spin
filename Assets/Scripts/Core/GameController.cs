@@ -1,12 +1,11 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using SweetSpin.Core.Managers;
 
 namespace SweetSpin.Core
 {
     /// <summary>
-    /// Main game controller - Orchestrates game logic
-    /// No longer responsible for view instantiation
+    /// Main game controller - Orchestrates game managers and coordinates game flow
     /// </summary>
     public class GameController : MonoBehaviour
     {
@@ -14,7 +13,7 @@ namespace SweetSpin.Core
         [SerializeField] private SlotMachineConfiguration configuration;
 
         [Header("View")]
-        [SerializeField] private GameObject slotMachineViewPrefab; // The complete UI prefab
+        [SerializeField] private GameObject slotMachineViewPrefab;
 
         // Services
         private IEventBus eventBus;
@@ -29,7 +28,14 @@ namespace SweetSpin.Core
         private SlotMachineModel gameModel;
         private SlotMachineView slotMachineView;
         private GameStateMachine stateMachine;
-        private AutoPlayService autoPlayManager;
+
+        // Managers (using interfaces)
+        private ISpinManager spinManager;
+        private IWinPresentationManager winPresentationManager;
+        private IBettingManager bettingManager;
+        private IGameStatisticsManager statisticsManager;
+        private IAutoPlayExecutor autoPlayExecutor;
+        private DebugCommandsManager debugCommandsManager;
 
         private bool isTurboMode = false;
 
@@ -38,6 +44,7 @@ namespace SweetSpin.Core
             InitializeServices();
             InitializeGame();
             CreateView();
+            InitializeManagers();
             SetupUI();
         }
 
@@ -52,19 +59,16 @@ namespace SweetSpin.Core
                 eventBus.Unsubscribe<ReelStoppedEvent>(OnReelStopped);
                 eventBus.Unsubscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
                 eventBus.Unsubscribe<TurboModeChangedEvent>(OnTurboModeChanged);
-                eventBus.Unsubscribe<AutoPlayStartedEvent>(OnAutoPlayStarted);
             }
+
+            // Cleanup AutoPlayExecutor
+            autoPlayExecutor?.Cleanup();
 
             // Save game state
             if (saveService != null && gameModel != null)
             {
                 saveService.SaveCredits(gameModel.Credits);
             }
-        }
-
-        private void OnTurboModeChanged(TurboModeChangedEvent e)
-        {
-            isTurboMode = e.IsEnabled;
         }
 
         private void InitializeServices()
@@ -117,12 +121,76 @@ namespace SweetSpin.Core
 
                 // Initialize state machine with the view's reel controllers
                 stateMachine = new GameStateMachine(gameModel, slotMachineView.Reels, eventBus);
-
             }
             else
             {
                 Debug.LogError("SlotMachineView prefab not assigned!");
             }
+        }
+
+        private void InitializeManagers()
+        {
+            // Create and initialize SpinManager (as a regular class, not component)
+            spinManager = new SpinManager();
+            spinManager.Initialize(
+                configuration,
+                gameModel,
+                slotMachineView,
+                stateMachine,
+                eventBus,
+                audioService,
+                paylineService,
+                saveService
+            );
+
+            // Create and initialize WinPresentationManager
+            winPresentationManager = gameObject.AddComponent<WinPresentationManager>();
+            winPresentationManager.Initialize(
+                configuration,
+                slotMachineView,
+                stateMachine,
+                audioService
+            );
+
+            // Create and initialize BettingManager (as a regular class, not component)
+            bettingManager = new BettingManager();
+            bettingManager.Initialize(
+                gameModel,
+                slotMachineView,
+                eventBus,
+                audioService,
+                saveService
+            );
+
+            // Create and initialize GameStatisticsManager (as a regular class, not component)
+            statisticsManager = new GameStatisticsManager();
+            statisticsManager.Initialize(saveService, gameModel);
+
+            // Create and initialize AutoPlayExecutor (as a regular class, not component)
+            autoPlayExecutor = new AutoPlayExecutor();
+            autoPlayExecutor.Initialize(
+                configuration,
+                gameModel,
+                stateMachine,
+                spinManager,
+                winPresentationManager,
+                statisticsManager,
+                autoPlayService,
+                audioService,
+                eventBus,
+                this  // Pass GameController as the coroutine runner
+            );
+
+            // Create and initialize DebugCommandsManager
+            debugCommandsManager = gameObject.AddComponent<DebugCommandsManager>();
+            debugCommandsManager.Initialize(
+                configuration,
+                gameModel,
+                slotMachineView,
+                bettingManager,
+                winPresentationManager,
+                statisticsManager
+            );
         }
 
         private void SetupUI()
@@ -134,10 +202,10 @@ namespace SweetSpin.Core
                 slotMachineView.SpinButton.onClick.AddListener(OnSpinButtonClick);
 
             if (slotMachineView.IncreaseBetButton != null)
-                slotMachineView.IncreaseBetButton.onClick.AddListener(() => ChangeBet(1));
+                slotMachineView.IncreaseBetButton.onClick.AddListener(() => bettingManager.ChangeBet(1));
 
             if (slotMachineView.DecreaseBetButton != null)
-                slotMachineView.DecreaseBetButton.onClick.AddListener(() => ChangeBet(-1));
+                slotMachineView.DecreaseBetButton.onClick.AddListener(() => bettingManager.ChangeBet(-1));
 
             // Subscribe to events
             SubscribeToEvents();
@@ -154,160 +222,48 @@ namespace SweetSpin.Core
             eventBus.Subscribe<ReelStoppedEvent>(OnReelStopped);
             eventBus.Subscribe<AddCreditsRequestEvent>(OnAddCreditsRequest);
             eventBus.Subscribe<TurboModeChangedEvent>(OnTurboModeChanged);
-            eventBus.Subscribe<AutoPlayStartedEvent>(OnAutoPlayStarted);
         }
 
         private void OnSpinButtonClick()
         {
             audioService.PlayButtonClick();
 
-            if (stateMachine.CurrentState != GameState.Idle)
+            if (!spinManager.ValidateSpin())
             {
-                Debug.Log("Cannot spin - game not idle");
-                return;
-            }
-
-            if (!gameModel.CanSpin())
-            {
-                // Publish event
-                eventBus.Publish(new InsufficientCreditsEvent(
-                    gameModel.CurrentBet,
-                    gameModel.Credits
-                ));
                 return;
             }
 
             // Duck music when spin starts
             audioService.DuckMusic();
 
-            StartCoroutine(ExecuteSpin(isTurboMode));
+            StartCoroutine(ExecuteCompleteSpinSequence());
         }
 
-        private IEnumerator ExecuteSpin(bool isTurboMode = false)
+        private IEnumerator ExecuteCompleteSpinSequence()
         {
-            // Change state
-            stateMachine.TransitionTo(GameState.Spinning);
+            // Execute the spin
+            yield return spinManager.ExecuteSpin(isTurboMode);
 
-            // Deduct bet and generate results
-            var spinResult = gameModel.ExecuteSpin();
+            // Get the spin result from the SpinManager
+            SpinResult spinResult = spinManager.LastSpinResult;
 
-            // Publish spin started event
-            eventBus.Publish(new SpinStartedEvent(gameModel.CurrentBet));
-
-            // Calculate timing based on turbo mode
-            float spinDuration = isTurboMode ? configuration.turboSpinDuration : configuration.spinDuration;
-            float reelStopDelay = isTurboMode ? configuration.turboReelStopDelay : configuration.reelStopDelay;
-            float spinSpeed = isTurboMode ? configuration.turboSpinSpeed : configuration.spinSpeed;
-
-            // Tell the view to spin the reels with appropriate speed
-            slotMachineView.SpinReels(spinResult.Grid, spinSpeed, spinDuration, reelStopDelay);
-
-            // Wait for all reels to stop (adjusted for turbo mode)
-            yield return new WaitForSeconds(spinDuration + (configuration.reelCount * reelStopDelay));
-
-            // Stop the spinning sound loop
-            audioService.StopSpinSound();
-
-            // Transition to evaluation
-            stateMachine.TransitionTo(GameState.Evaluating);
-
-            // Evaluate wins
-            var wins = paylineService.EvaluatePaylines(spinResult.Grid, gameModel.BetPerLine);
-            spinResult.SetWins(wins);
-
-            // Update credits with winnings
-            if (spinResult.IsWin)
+            if (spinResult != null)
             {
-                gameModel.AddCredits(spinResult.TotalWin);
-            }
+                // Update statistics
+                statisticsManager.UpdateStatistics(spinResult);
 
-            // Save game state
-            saveService.SaveCredits(gameModel.Credits);
-
-            // Update statistics
-            UpdateStatistics(spinResult);
-
-            // Publish completion event
-            eventBus.Publish(new SpinCompletedEvent(spinResult));
-
-            // Show results
-            stateMachine.TransitionTo(GameState.ShowingWin);
-
-            // Pass turbo mode to win presentation for faster animations
-            yield return ShowWinPresentation(spinResult, isTurboMode);
-
-            // Restore music volume after everything is done
-            audioService.RestoreMusic();
-
-            // Return to idle
-            stateMachine.TransitionTo(GameState.Idle);
-        }
-
-        private IEnumerator ShowWinPresentation(SpinResult result, bool isTurboMode = false)
-        {
-            if (result.IsWin)
-            {
-                // Determine win tier
-                WinTier tier = DetermineWinTier(result);
-
-                // Play appropriate sound
-                audioService.PlayWinSound(tier);
-
-                // Show win message with effects
-                slotMachineView.ShowWinMessage(result.GetWinMessage(), tier);
-
-                // Start the animation coroutine and wait for it to complete
-                yield return StartCoroutine(slotMachineView.AnimateMultipleWinningLinesCoroutine(result.Wins, isTurboMode));
-
-                // Additional hold time after all animations complete
-                float additionalHoldTime = isTurboMode ? configuration.turboSequentialDelay : configuration.sequentialAnimationDelay;
-                yield return new WaitForSeconds(additionalHoldTime);
-
-                // Clear win animations after presentation
-                slotMachineView.ClearAllWinAnimations();
+                // Show win presentation (this will transition to ShowingWin and back to Idle)
+                yield return winPresentationManager.ShowWinPresentation(spinResult, isTurboMode);
             }
             else
             {
-                // Play no-win sound for losses
-                audioService.PlayWinSound(WinTier.None);
-
-                slotMachineView.ShowWinMessage("Try Again!", WinTier.None);
-
-                // only wait 1 frame to let message show briefly
-                yield return null;
-            }
-        }
-
-        private WinTier DetermineWinTier(SpinResult result)
-        {
-            float multiplier = result.GetWinMultiplier();
-
-            if (multiplier >= 50f) return WinTier.Jackpot;
-            if (multiplier >= 25f) return WinTier.Mega;
-            if (multiplier >= 10f) return WinTier.Big;
-            if (multiplier >= 5f) return WinTier.Medium;
-            if (multiplier > 0) return WinTier.Small;
-            return WinTier.None;
-        }
-
-        private void UpdateStatistics(SpinResult result)
-        {
-            var stats = saveService.LoadStatistics();
-            stats.totalSpins++;
-            stats.totalWagered += gameModel.CurrentBet;
-
-            if (result.IsWin)
-            {
-                stats.totalWins++;
-                stats.totalWon += result.TotalWin;
-
-                if (result.TotalWin > stats.biggestWin)
-                {
-                    stats.biggestWin = result.TotalWin;
-                }
+                // Fallback: if no result, just go back to idle
+                Debug.LogWarning("No spin result received, returning to idle");
+                stateMachine.TransitionTo(GameState.Idle);
             }
 
-            saveService.SaveStatistics(stats);
+            // Restore music volume after everything is done
+            audioService.RestoreMusic();
         }
 
         // Event handlers
@@ -328,203 +284,29 @@ namespace SweetSpin.Core
 
         private void OnReelStopped(ReelStoppedEvent e)
         {
-            audioService.PlayReelStop(e.ReelIndex);
-        }
-
-        private void ChangeBet(int direction)
-        {
-            audioService.PlayButtonClick();
-            gameModel.ChangeBetPerLine(direction);
-            UpdateUI();
-        }
-
-        private void ModifyCredits(int amount)
-        {
-            if (gameModel == null) return;
-
-            gameModel.AddCredits(amount);
-            saveService?.SaveCredits(gameModel.Credits);
-            UpdateUI();
+            spinManager.HandleReelStop(e.ReelIndex);
         }
 
         private void OnAddCreditsRequest(AddCreditsRequestEvent e)
         {
-            int previousCredits = gameModel.Credits;
-            ModifyCredits(e.Amount);
+            bettingManager.OnAddCreditsRequest(e);
+        }
 
-            // Play coin drop sound when credits are added
-            audioService.PlayCoinDrop();
-
-            eventBus.Publish(new CreditsChangedEvent(previousCredits, gameModel.Credits));
-            slotMachineView.ShowWinMessage($"+{e.Amount} Credits!", WinTier.Small);
+        private void OnTurboModeChanged(TurboModeChangedEvent e)
+        {
+            isTurboMode = e.IsEnabled;
+            debugCommandsManager.SetTurboMode(e.IsEnabled);
         }
 
         private void UpdateUI()
         {
-            if (slotMachineView != null)
+            if (slotMachineView != null && gameModel != null)
             {
                 slotMachineView.UpdateUI(
                     gameModel.Credits,
                     gameModel.CurrentBet
                 );
             }
-        }
-
-        private void OnAutoPlayStarted(AutoPlayStartedEvent e)
-        {
-            // Start the auto-play coroutine
-            StartCoroutine(ExecuteAutoPlaySequence());
-        }
-
-        private IEnumerator ExecuteAutoPlaySequence()
-        {
-            // Duck music at the start of auto-play sequence
-            audioService.DuckMusic();
-
-            while (autoPlayService.ShouldContinue())
-            {
-                // Check if we can afford to spin
-                if (!gameModel.CanSpin())
-                {
-                    autoPlayService.StopDueToInsufficientCredits();
-                    break;
-                }
-
-                // Execute single spin (this handles state transitions internally)
-                yield return ExecuteSpin(isTurboMode);
-
-                // Notify auto-play service that spin completed
-                autoPlayService.OnSpinCompleted();
-
-                // If more spins remain, add delay with proper state
-                if (autoPlayService.ShouldContinue())
-                {
-                    // Transition to waiting state to keep UI locked
-                    stateMachine.TransitionTo(GameState.AutoPlayWaiting);
-
-                    // Wait between spins
-                    float delay = isTurboMode ? configuration.autoPlayDelayTurbo : configuration.autoPlayDelay;
-                    yield return new WaitForSeconds(delay);
-
-                    // Return to idle before next spin
-                    stateMachine.TransitionTo(GameState.Idle);
-                }
-            }
-
-            // Restore music when auto-play ends
-            audioService.RestoreMusic();
-        }
-
-        [ContextMenu("Debug/Add 100 Credits")]
-        private void Add100Credits() => AddDebugCredits(100);
-
-        [ContextMenu("Debug/Add 1000 Credits")]
-        private void Add1000Credits() => AddDebugCredits(1000);
-
-        [ContextMenu("Debug/Remove 100 Credits")]
-        private void Remove100Credits() => AddDebugCredits(-100);
-
-        [ContextMenu("Debug/Remove 1000 Credits")]
-        private void Remove1000Credits() => AddDebugCredits(-1000);
-
-        [ContextMenu("Debug/Reset to Starting Credits")]
-        private void ResetCredits()
-        {
-            if (gameModel != null && configuration != null)
-            {
-                gameModel.SetCredits(configuration.startingCredits);
-                saveService?.SaveCredits(gameModel.Credits);
-                UpdateUI();
-                Debug.Log("Reset to starting credits: " + configuration.startingCredits);
-            }
-        }
-
-        private void AddDebugCredits(int amount)
-        {
-            ModifyCredits(amount);
-            Debug.Log($"Added {amount} credits. New balance: {gameModel.Credits}");
-        }
-
-        [ContextMenu("Debug/Test Single Win")]
-        private void TestSingleWin()
-        {
-            CreateTestWin(1);
-        }
-
-        [ContextMenu("Debug/Test Double Win")]
-        private void TestDoubleWin()
-        {
-            CreateTestWin(2);
-        }
-
-        [ContextMenu("Debug/Test Triple Win")]
-        private void TestTripleWin()
-        {
-            CreateTestWin(3);
-        }
-
-        [ContextMenu("Debug/Test 5 Line Win")]
-        private void TestFiveLineWin()
-        {
-            CreateTestWin(5);
-        }
-
-        [ContextMenu("Debug/Test Max Win (10 lines)")]
-        private void TestMaxWin()
-        {
-            CreateTestWin(10);
-        }
-
-        private void CreateTestWin(int lineCount)
-        {
-            if (gameModel == null || slotMachineView == null)
-            {
-                Debug.LogError("Game not properly initialized for testing");
-                return;
-            }
-
-            // Debug win animation
-            var testWins = new List<PaylineWin>();
-
-            for (int i = 0; i < lineCount; i++)
-            {
-                // Create a test winning line
-                var positions = new int[] { 1, 1, 1, 1, 1 }; // All middle row for simplicity
-
-                var win = new PaylineWin(
-                    i,                          // payline index
-                    SymbolType.Cherry,          // symbol type
-                    3,                          // match count
-                    50 * gameModel.BetPerLine,  // win amount
-                    positions                   // positions
-                );
-
-                testWins.Add(win);
-            }
-
-            // Create a test spin result
-            var testGrid = new SymbolType[5, 3];
-            for (int reel = 0; reel < 5; reel++)
-            {
-                for (int row = 0; row < 3; row++)
-                {
-                    testGrid[reel, row] = row == 1 ? SymbolType.Cherry : SymbolType.Lemon;
-                }
-            }
-
-            var testResult = new SpinResult(testGrid, gameModel.CurrentBet);
-            testResult.SetWins(testWins);
-
-            // Show the win presentation
-            Debug.Log($"Testing {lineCount} winning lines");
-            StartCoroutine(ShowWinPresentation(testResult, isTurboMode));
-        }
-
-        [ContextMenu("Debug/Toggle Turbo for Testing")]
-        private void ToggleTurboForTesting()
-        {
-            isTurboMode = !isTurboMode;
-            Debug.Log($"Turbo mode for testing: {(isTurboMode ? "ON" : "OFF")}");
         }
     }
 }
