@@ -4,12 +4,13 @@ using System.Collections.Generic;
 namespace SweetSpin
 {
     /// <summary>
-    /// Implements a publish-subscribe pattern for decoupled communication between game components.
-    /// Allows services and views to react to game events without direct references.
+    /// Simple event bus for game events
     /// </summary>
     public class EventBus : IEventBus
     {
-        /// <summary>Registry of event handlers organized by event type</summary>
+        /// <summary>
+        /// Registry of event handlers organized by event type
+        /// </summary>
         private readonly Dictionary<Type, List<Delegate>> handlers = new Dictionary<Type, List<Delegate>>();
 
         /// <summary>

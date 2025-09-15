@@ -8,9 +8,7 @@ using SweetSpin.Simulation.Statistics;
 namespace SweetSpin.Simulation.Core
 {
     /// <summary>
-    /// Core simulation engine that executes headless game sessions using production
-    /// game logic. Manages service initialization, spin execution, statistics collection,
-    /// and report generation without UI dependencies for maximum performance.
+    /// Runs slot machine simulations without UI for testing RTP and game balance
     /// </summary>
     public class SimulationController
     {

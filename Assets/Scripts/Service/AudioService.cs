@@ -132,7 +132,7 @@ namespace SweetSpin
             availableSfxSources.AddRange(sfxSources);
         }
 
-        // Convert linear volume (0-1) to decibels for mixer
+        // Linear to db conversion
         private float LinearToDecibel(float linear)
         {
             if (linear <= 0f)
@@ -186,7 +186,7 @@ namespace SweetSpin
 
         private AudioSource GetAvailableSfxSource()
         {
-            // Round-robin through SFX sources
+            // Cycle through sources to avoid cutting off sounds
             AudioSource source = sfxSources[nextSfxSourceIndex];
             nextSfxSourceIndex = (nextSfxSourceIndex + 1) % sfxSources.Length;
 

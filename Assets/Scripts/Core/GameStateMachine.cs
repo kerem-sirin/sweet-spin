@@ -3,8 +3,7 @@ using UnityEngine;
 namespace SweetSpin.Core
 {
     /// <summary>
-    /// Manages game state transitions and enforces valid state flow.
-    /// Ensures game logic executes in the correct sequence.
+    /// Handles state transitions
     /// </summary>
     public class GameStateMachine
     {

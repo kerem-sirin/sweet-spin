@@ -483,7 +483,7 @@ namespace SweetSpin.Core
                 return;
             }
 
-            // Create fake win data for testing
+            // Debug win animation
             var testWins = new List<PaylineWin>();
 
             for (int i = 0; i < lineCount; i++)
