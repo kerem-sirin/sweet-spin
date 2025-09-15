@@ -36,7 +36,7 @@ namespace SweetSpin.Core
 
         [Header("Symbols")]
         public SymbolData[] symbolDatabase;
-        public int[] SymbolWeights => new int[] { 30, 25, 20, 15, 10, 8, 5, 3 };
+        public int[] SymbolWeights => new int[] { 55, 48, 40, 32, 25, 18, 12, 7, 4, 2 };
 
         [Header("Win Frame Colors")]
         [Tooltip("Colors for win frames on different paylines")]

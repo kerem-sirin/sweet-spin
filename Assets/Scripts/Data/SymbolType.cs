@@ -6,21 +6,15 @@ namespace SweetSpin
     /// </summary>
     public enum SymbolType
     {
-        /// <summary>Lowest value fruit symbol</summary>
-        Cherry,
-        /// <summary>Low value fruit symbol</summary>
-        Lemon,
-        /// <summary>Low-medium value fruit symbol</summary>
-        Orange,
-        /// <summary>Medium value fruit symbol</summary>
-        Plum,
-        /// <summary>Medium-high value symbol</summary>
-        Bell,
-        /// <summary>High value BAR symbol</summary>
-        Bar,
-        /// <summary>High value lucky seven</summary>
-        Seven,
-        /// <summary>Special symbol that substitutes for any other</summary>
-        Wild
+        Cherry,      // 0 - Lowest
+        Grape,       // 1
+        Lemon,       // 2
+        Orange,      // 3
+        Candy,       // 4
+        Plum,        // 5
+        Bell,        // 6
+        Bar,         // 7
+        Seven,       // 8
+        Wild         // 9 - Highest
     }
 }
