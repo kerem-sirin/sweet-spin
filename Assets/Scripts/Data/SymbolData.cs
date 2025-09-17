@@ -1,4 +1,3 @@
-using SweetSpin.Core;
 using UnityEngine;
 
 namespace SweetSpin
@@ -11,7 +10,9 @@ namespace SweetSpin
     public class SymbolData
     {
         public SymbolType type;
+        public string name;  // Add this
         public Sprite sprite;
         public int[] payouts = new int[3];
+        public int weight = 10;
     }
 }

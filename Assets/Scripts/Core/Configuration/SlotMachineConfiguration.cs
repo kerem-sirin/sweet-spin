@@ -35,8 +35,22 @@ namespace SweetSpin.Core
         public float turboSequentialDelay = 0.3f; // Faster delay for turbo mode
 
         [Header("Symbols")]
-        public SymbolData[] symbolDatabase;
-        public int[] SymbolWeights => new int[] { 55, 48, 40, 32, 25, 18, 12, 7, 4, 2 };
+        [SerializeField] private TextAsset symbolJSON; // JSON file containing symbol configuration
+        public SymbolData[] symbolDatabase
+        {
+            get
+            {
+                if (!symbolsLoaded || _symbolDatabase == null)
+                {
+                    LoadSymbolsFromJSON();
+                }
+                return _symbolDatabase;
+            }
+        }
+
+        private SymbolData[] _symbolDatabase;
+        private bool symbolsLoaded = false;
+
 
         [Header("Win Frame Colors")]
         [Tooltip("Colors for win frames on different paylines")]
@@ -176,12 +190,106 @@ namespace SweetSpin.Core
             }
         }
 
+        private void LoadSymbolsFromJSON()
+        {
+            if (symbolJSON == null)
+            {
+                Debug.LogError("SlotMachineConfiguration: Symbol JSON file is not assigned!");
+                _symbolDatabase = new SymbolData[0];
+                return;
+            }
+
+            string jsonContent = symbolJSON.text;
+
+            if (string.IsNullOrEmpty(jsonContent))
+            {
+                Debug.LogError("SlotMachineConfiguration: Symbol JSON file is empty!");
+                _symbolDatabase = new SymbolData[0];
+                return;
+            }
+
+            try
+            {
+                // Parse JSON
+                var symbolsData = JsonUtility.FromJson<SymbolDatabase>(jsonContent);
+
+                if (symbolsData == null || symbolsData.symbols == null || symbolsData.symbols.Length == 0)
+                {
+                    Debug.LogError("SlotMachineConfiguration: Failed to parse symbols from JSON - invalid structure!");
+                    _symbolDatabase = new SymbolData[0];
+                    return;
+                }
+
+                // Create SymbolData array
+                _symbolDatabase = new SymbolData[symbolsData.symbols.Length];
+
+                // Load sprites and populate
+                for (int i = 0; i < symbolsData.symbols.Length; i++)
+                {
+                    var jsonSymbol = symbolsData.symbols[i];
+
+                    // Load sprite from Resources
+                    Sprite sprite = Resources.Load<Sprite>($"Symbols/Symbol{i}");
+
+                    if (sprite == null)
+                    {
+                        Debug.LogWarning($"SlotMachineConfiguration: Could not load sprite at 'Resources/Symbols/Symbol{i}'");
+                    }
+
+                    // Create SymbolData
+                    symbolDatabase[i] = new SymbolData
+                    {
+                        type = (SymbolType)jsonSymbol.type,
+                        name = jsonSymbol.name,
+                        sprite = sprite,
+                        weight = jsonSymbol.weight,
+                        payouts = jsonSymbol.payouts
+                    };
+                }
+
+                symbolsLoaded = true;
+                Debug.Log($"SlotMachineConfiguration: Successfully loaded {symbolDatabase.Length} symbols from JSON");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"SlotMachineConfiguration: Exception while parsing symbol JSON: {e.Message}");
+                _symbolDatabase = new SymbolData[0];
+            }
+        }
+
+        // Optimized loading without sprites (for simulation)
+        public void LoadSymbolsForSimulation()
+        {
+            if (symbolJSON == null) return;
+
+            var symbolsData = JsonUtility.FromJson<SymbolDatabase>(symbolJSON.text);
+            _symbolDatabase = new SymbolData[symbolsData.symbols.Length];
+
+            for (int i = 0; i < symbolsData.symbols.Length; i++)
+            {
+                var jsonSymbol = symbolsData.symbols[i];
+
+                // Skip sprite loading for simulation!
+                _symbolDatabase[i] = new SymbolData
+                {
+                    type = (SymbolType)jsonSymbol.type,
+                    name = jsonSymbol.name,
+                    sprite = null,  // No sprite needed for simulation
+                    weight = jsonSymbol.weight,
+                    payouts = jsonSymbol.payouts
+                };
+            }
+            symbolsLoaded = true;
+            Debug.Log($"Loaded {_symbolDatabase.Length} symbols for simulation (no sprites)");
+        }
+
         // Reload paylines when JSON changes in inspector
         private void OnValidate()
         {
-            // Force reload when JSON file is changed in inspector
+            // Force reload when JSON files are changed in inspector
             cachedPaylinePatterns = null;
             cachedPaylineCount = 0;
+            symbolsLoaded = false;
         }
     }
 }

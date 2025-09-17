@@ -308,6 +308,9 @@ namespace SweetSpin.Simulation.Editor
                 return;
             }
 
+            // Force load symbols for simulation before running
+            configuration.LoadSymbolsForSimulation();
+
             // Start timer for all simulations
             var totalStopwatch = Stopwatch.StartNew();
 

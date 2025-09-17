@@ -29,37 +29,7 @@ MonoBehaviour:
   autoPlayDelayTurbo: 0.5
   sequentialAnimationDelay: 1
   turboSequentialDelay: 0.3
-  symbolDatabase:
-  - type: 0
-    sprite: {fileID: 21300000, guid: e293d7630ca016b439b384d84ed98ca6, type: 3}
-    payouts: 0e0000001d0000003f000000
-  - type: 1
-    sprite: {fileID: 21300000, guid: 92bb0b17f64619f4a979af1270499aa1, type: 3}
-    payouts: 150000002b00000056000000
-  - type: 2
-    sprite: {fileID: 21300000, guid: 6f52d7c75d0ca294ab75ecbf92a1e381, type: 3}
-    payouts: 1d0000003900000071000000
-  - type: 3
-    sprite: {fileID: 21300000, guid: 5d2e0305125bd9c46846ead74887daae, type: 3}
-    payouts: 2900000053000000ae000000
-  - type: 4
-    sprite: {fileID: 21300000, guid: 7ef688ad1ea44114bb432bf575087973, type: 3}
-    payouts: 3200000069000000ce000000
-  - type: 5
-    sprite: {fileID: 21300000, guid: cba06cf2d71f78047afcd43f26cce417, type: 3}
-    payouts: 3f0000007c000000f8000000
-  - type: 6
-    sprite: {fileID: 21300000, guid: 3b68180cec2f4904a9beaf302344c03a, type: 3}
-    payouts: 53000000a50000004a010000
-  - type: 7
-    sprite: {fileID: 21300000, guid: f097b47a4e161924c8bc0f1caf078e97, type: 3}
-    payouts: 69000000ce00000005020000
-  - type: 8
-    sprite: {fileID: 21300000, guid: 22c365c478a0e3d4dad974da45d3518f, type: 3}
-    payouts: 9b0000003401000039030000
-  - type: 9
-    sprite: {fileID: 21300000, guid: 7a86c193fb2fac140aa0e3d8e5a47873, type: 3}
-    payouts: 340100006702000072060000
+  symbolJSON: {fileID: 0}
   winFrameColors:
   - {r: 0.6598739, g: 0.962264, b: 0.2314879, a: 1}
   - {r: 0.9103772, g: 0.07729603, b: 0.4402226, a: 1}
