@@ -58,15 +58,13 @@ namespace SweetSpin
         private SymbolType[,] GenerateRandomGrid()
         {
             SymbolType[,] grid = new SymbolType[config.reelCount, config.rowCount];
-
             for (int reel = 0; reel < config.reelCount; reel++)
             {
                 for (int row = 0; row < config.rowCount; row++)
                 {
-                    grid[reel, row] = randomService.GetRandomSymbol(config.SymbolWeights);
+                    grid[reel, row] = randomService.GetRandomSymbol(config.symbolDatabase);
                 }
             }
-
             return grid;
         }
     }

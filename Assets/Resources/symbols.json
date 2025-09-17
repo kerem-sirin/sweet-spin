@@ -1,0 +1,65 @@
+{
+  "version": "1.0",
+  "symbols": [
+    {
+      "type": 0,
+      "name": "Cherry",
+      "weight": 55,
+      "payouts": [13, 27, 55]
+    },
+    {
+      "type": 1,
+      "name": "Grape",
+      "weight": 48,
+      "payouts": [20, 40, 80]
+    },
+    {
+      "type": 2,
+      "name": "Lemon",
+      "weight": 40,
+      "payouts": [27, 54, 107]
+    },
+    {
+      "type": 3,
+      "name": "Orange",
+      "weight": 32,
+      "payouts": [38, 74, 147]
+    },
+    {
+      "type": 4,
+      "name": "Candy",
+      "weight": 25,
+      "payouts": [48, 92, 187]
+    },
+    {
+      "type": 5,
+      "name": "Plum",
+      "weight": 18,
+      "payouts": [65, 130, 258]
+    },
+    {
+      "type": 6,
+      "name": "Bell",
+      "weight": 12,
+      "payouts": [85, 170, 340]
+    },
+    {
+      "type": 7,
+      "name": "Bar",
+      "weight": 7,
+      "payouts": [110, 220, 550]
+    },
+    {
+      "type": 8,
+      "name": "Seven",
+      "weight": 4,
+      "payouts": [165, 385, 880]
+    },
+    {
+      "type": 9,
+      "name": "Wild",
+      "weight": 3,
+      "payouts": [330, 825, 2200]
+    }
+  ]
+}

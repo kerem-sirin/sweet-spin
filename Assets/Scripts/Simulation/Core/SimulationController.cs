@@ -34,13 +34,17 @@ namespace SweetSpin.Simulation.Core
         public SimulationController(SlotMachineConfiguration config)
         {
             configuration = config;
+
+            // Load symbols optimized for simulation (no sprites)
+            configuration.LoadSymbolsForSimulation();
+
             InitializeServices();
             InitializeTracking();
         }
 
         private void InitializeServices()
         {
-            // Create service instances - same as game but without UI services
+            // Create service instances
             randomService = new RandomService();
             symbolService = new SymbolService();
             paylineService = new PaylineService();
@@ -49,7 +53,7 @@ namespace SweetSpin.Simulation.Core
             symbolService.Initialize(configuration.symbolDatabase);
             paylineService.Initialize(configuration.paylinePatterns);
 
-            // Also initialize payline service with symbols for payout calculation
+            // Initialize PaylineService with symbols for payout calculation
             var paylineServiceImpl = paylineService as PaylineService;
             paylineServiceImpl?.Initialize(configuration.symbolDatabase);
         }

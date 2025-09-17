@@ -8,6 +8,6 @@ namespace SweetSpin
         void SetSeed(int seed);
         int Range(int min, int max);
         float Range(float min, float max);
-        SymbolType GetRandomSymbol(int[] weights);
+        SymbolType GetRandomSymbol(SymbolData[] symbolDatabase);
     }
 }

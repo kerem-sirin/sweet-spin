@@ -22,25 +22,36 @@ namespace SweetSpin
             return (float)(random.NextDouble() * (max - min) + min);
         }
 
-        public SymbolType GetRandomSymbol(int[] weights)
+        public SymbolType GetRandomSymbol(SymbolData[] symbolDatabase)
         {
-            int totalWeight = 0;
-            foreach (int weight in weights)
-                totalWeight += weight;
+            if (symbolDatabase == null || symbolDatabase.Length == 0)
+            {
+                return SymbolType.Cherry; // Fallback
+            }
 
+            // Calculate total weight
+            int totalWeight = 0;
+            foreach (var symbol in symbolDatabase)
+            {
+                totalWeight += symbol.weight;
+            }
+
+            // Generate random value
             int randomValue = Range(0, totalWeight);
             int currentWeight = 0;
 
-            for (int i = 0; i < weights.Length; i++)
+            // Find the selected symbol
+            for (int i = 0; i < symbolDatabase.Length; i++)
             {
-                currentWeight += weights[i];
+                currentWeight += symbolDatabase[i].weight;
                 if (randomValue < currentWeight)
                 {
-                    return (SymbolType)i;
+                    return symbolDatabase[i].type;
                 }
             }
 
-            return SymbolType.Cherry;
+            // Fallback (should never reach here)
+            return symbolDatabase[0].type;
         }
     }
 }
