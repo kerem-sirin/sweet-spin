@@ -12,5 +12,10 @@ namespace SweetSpin
         void OnSpinCompleted();
         void StopDueToInsufficientCredits();
         bool ShouldContinue();
+
+        /// <summary>
+        /// Force stop auto-play immediately (used for cleanup)
+        /// </summary>
+        void ForceStop();
     }
 }
