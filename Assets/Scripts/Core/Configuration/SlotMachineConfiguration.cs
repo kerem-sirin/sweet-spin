@@ -237,7 +237,7 @@ namespace SweetSpin.Core
                     }
 
                     // Create SymbolData
-                    symbolDatabase[i] = new SymbolData
+                    _symbolDatabase[i] = new SymbolData
                     {
                         type = (SymbolType)jsonSymbol.type,
                         name = jsonSymbol.name,
@@ -248,7 +248,7 @@ namespace SweetSpin.Core
                 }
 
                 symbolsLoaded = true;
-                Debug.Log($"SlotMachineConfiguration: Successfully loaded {symbolDatabase.Length} symbols from JSON");
+                Debug.Log($"SlotMachineConfiguration: Successfully loaded {_symbolDatabase.Length} symbols from JSON");
             }
             catch (System.Exception e)
             {
