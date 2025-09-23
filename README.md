@@ -30,7 +30,7 @@ A Unity-based 5x3 slot machine game with 25 paylines, featuring a candy/fruit th
 - **RTP (Return to Player):** 94.46%
 - **Hit Frequency:** 36.79% (1 in 2.72 spins)
 - **Volatility:** Medium-Low
-- **Max Win:** 1650x line bet
+- **Max Win:** 2200x line bet
 - **Paylines:** 25
 
 ### Verified Simulation Results
