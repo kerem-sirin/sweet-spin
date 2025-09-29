@@ -115,9 +115,5 @@ This simulation system ensures mathematical fairness and helps balance game econ
 - All animations use DOTween for smooth performance
 - Event bus pattern ensures loose coupling between systems
 
-## ● Author
-Kerem Sirin - 09/2025
-
 ## ● License
-- This project is available for portfolio demonstration purposes.
 - MIT License - See LICENSE file for details
